@@ -10,20 +10,34 @@ public class Controller2D : MonoBehaviour {
 
     public float MoveSpeed { get { return moveSpeed; } }
 
+    public float JumpVelocity { get { return jumpVelocity; } }
+
+    public float JumpHeight { get { return jumpHeight; } }
+
+    public float TimeToJumpApex { get { return timeToJumpApex; } }
+
+    public float VelocityXSmoothing { get { return velocityXSmoothing; } }
+
+    public float VelocityYSmoothing { get { return velocityYSmoothing; } }
+
+    public float AccelerationTimeAirborn { get { return accelerationTimeAirborn; } }
+
+    public float AccelerationTimeGrounded { get { return accelerationTimeGrounded; } }
+
     const float skinWidth = 0.015f;
 
-    [Header ("Collision Mask")]
+    [Header("Collision Mask")]
     [SerializeField]
     LayerMask layerMask;
 
-    [Header ("RayCast Counts")]
+    [Header("RayCast Counts")]
     [SerializeField]
     public int horizontalRayCount;
 
     [SerializeField]
     public int verticalRayCount;
 
-    [Header ("RayCast Spaces")]
+    [Header("RayCast Spaces")]
     [SerializeField]
     [ReadOnly] float horizontalRaySpacing;
 
@@ -33,16 +47,41 @@ public class Controller2D : MonoBehaviour {
     [Header("Physics Configuration")]
 
     [SerializeField]
-    float gravity = -20;
+    float moveSpeed = 3;
 
     [SerializeField]
-    float moveSpeed = 3;
+    float jumpHeight;
+
+    [SerializeField]
+    float timeToJumpApex;
+
+    [SerializeField]
+    float accelerationTimeAirborn;
+
+    [SerializeField]
+    float accelerationTimeGrounded;
+
+    [Header ("Physics Results")]
+    [SerializeField]
+    [ReadOnly] float jumpVelocity;
+
+    [SerializeField]
+    [ReadOnly] float gravity;
+
+    float velocityXSmoothing;
+
+    float velocityYSmoothing;
 
     BoxCollider2D boxCollider;
 
     RayCastOrgins rayCastOrigins;
+
+    public CollisionInformation collisionInformation;
 	
 	void Start () {
+
+        gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
+        jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
 
         boxCollider = GetComponent<BoxCollider2D>();
         CalculateRaySpacing();
@@ -52,6 +91,7 @@ public class Controller2D : MonoBehaviour {
     public void Move(Vector3 velocity) {
 
         UpdateRayCastOrigins();
+        collisionInformation.Reset();
 
         if (velocity.x != 0) {
             HorizontalCollisions(ref velocity);
@@ -68,6 +108,7 @@ public class Controller2D : MonoBehaviour {
 
         float directionX = Mathf.Sign(velocity.x);
         float rayLength = Mathf.Abs(velocity.x) + skinWidth;
+        
 
         for (int i = 0; i < horizontalRayCount; i++) {
 
@@ -81,6 +122,9 @@ public class Controller2D : MonoBehaviour {
 
                 velocity.x = (hit.distance - skinWidth) * directionX;
                 rayLength = hit.distance;
+
+                collisionInformation.isLeft = directionX == -1;
+                collisionInformation.isRight = directionX == 1;
             }
 
             Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.red);
@@ -104,6 +148,9 @@ public class Controller2D : MonoBehaviour {
 
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
+
+                collisionInformation.isBelow = directionY == -1;
+                collisionInformation.isAbove = directionY == 1;
             }
 
             Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
@@ -146,7 +193,16 @@ public class Controller2D : MonoBehaviour {
 
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
+    }
 
+    public struct CollisionInformation {
+        public bool isBelow, isAbove;
+        public bool isRight, isLeft;
+
+        public void Reset() {
+            isBelow = isAbove = false;
+            isRight = isLeft = false;
+        }
     }
 }
 
