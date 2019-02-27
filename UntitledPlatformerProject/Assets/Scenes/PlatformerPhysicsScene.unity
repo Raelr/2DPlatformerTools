@@ -250,7 +250,7 @@ MonoBehaviour:
   horizontalRaySpacing: 0
   verticalRaySpacing: 0
   moveSpeed: 10
-  jumpHeight: 5
+  jumpHeight: 4
   timeToJumpApex: 0.5
   accelerationTimeAirborn: 0.1
   accelerationTimeGrounded: 0.05
