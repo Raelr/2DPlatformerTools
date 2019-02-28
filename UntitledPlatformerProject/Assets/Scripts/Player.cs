@@ -7,7 +7,13 @@ public class Player : MonoBehaviour {
 
     Controller2D controller;
 
-    Vector3 playerVelocity;
+    delegate void HorizontalMovementHandler();
+
+    [SerializeField]
+    event HorizontalMovementHandler MovedHorizontal;
+
+    
+
 
 	void Start () {
 
@@ -16,23 +22,14 @@ public class Player : MonoBehaviour {
 
 	void Update () {
 
-        if (controller.collisionInformation.isAbove || controller.collisionInformation.isBelow) {
-            playerVelocity.y = 0;
-        }
-
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), 0);
 
         if (Input.GetKeyDown(KeyCode.Space) && controller.collisionInformation.isBelow) {
 
-            playerVelocity.y = controller.JumpVelocity;
+            controller.Jump();
 
         }
 
-        float targetVelocityX = input.x * controller.MoveSpeed;
-        float xSmoothing = controller.VelocityXSmoothing;
-        playerVelocity.x = Mathf.SmoothDamp(playerVelocity.x, targetVelocityX, ref xSmoothing, controller.collisionInformation.isBelow ? controller.AccelerationTimeGrounded: controller.AccelerationTimeAirborn);
-        playerVelocity.y += controller.Gravity * Time.deltaTime;
-        controller.Move(playerVelocity * Time.deltaTime);
-
-	}
+        controller.MoveHorizontal(input);
+    }
 }

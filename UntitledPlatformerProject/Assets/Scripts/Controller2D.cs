@@ -77,6 +77,8 @@ public class Controller2D : MonoBehaviour {
     RayCastOrgins rayCastOrigins;
 
     public CollisionInformation collisionInformation;
+
+    Vector3 velocity;
 	
 	void Start () {
 
@@ -88,20 +90,46 @@ public class Controller2D : MonoBehaviour {
 
     }
 
-    public void Move(Vector3 velocity) {
+    public void Move(Vector3 input) {
 
         UpdateRayCastOrigins();
         collisionInformation.Reset();
 
-        if (velocity.x != 0) {
-            HorizontalCollisions(ref velocity);
+        if (input.x != 0) {
+            HorizontalCollisions(ref input);
         }
         
-        if (velocity.y != 0) {
-            VerticalCollisions(ref velocity);
+        if (input.y != 0) {
+            VerticalCollisions(ref input);
         }
         
-        transform.Translate(velocity);
+        transform.Translate(input);
+    }
+
+    public void MoveHorizontal(Vector3 input) {
+
+        if (collisionInformation.isAbove || collisionInformation.isBelow) {
+            velocity.y = 0;
+        }
+
+        float targetVelocityX = input.x * MoveSpeed;
+        float xSmoothing = VelocityXSmoothing;
+        velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref xSmoothing, collisionInformation.isBelow ? AccelerationTimeGrounded : AccelerationTimeAirborn);
+        velocity.y += Gravity * Time.deltaTime;
+        Move(velocity * Time.deltaTime);
+    }
+
+    public void ApplyGravity() {
+
+        velocity.y += Gravity * Time.deltaTime;
+        Move(velocity * Time.deltaTime);
+    }
+
+    public void Jump() {
+
+        velocity.y = jumpVelocity;
+        
+        Move(velocity * Time.deltaTime);
     }
 
     void HorizontalCollisions(ref Vector3 velocity) {
