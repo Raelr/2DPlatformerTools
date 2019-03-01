@@ -80,6 +80,10 @@ public class Controller2D : MonoBehaviour {
 
     Vector3 velocity;
 	
+    /// <summary>
+    /// Set jump velocity and gravity base don the jump height and timeToJumpApex variables. 
+    /// </summary>
+
 	void Start () {
 
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
@@ -90,97 +94,150 @@ public class Controller2D : MonoBehaviour {
 
     }
 
+    /// <summary>
+    /// Handles all movement (included jumps) and sets all possible collisions for the player to have given the velocity vector.
+    /// </summary>
+    /// <param name="input"> The velocity vector used to move the player </param>
+
     public void Move(Vector3 input) {
 
+        // Sets the positions where the raycasts will shoot from. Can account for changes in sprite and collider size. 
         UpdateRayCastOrigins();
-        collisionInformation.Reset();
 
+        collisionInformation.Reset();
+        
+        // Update Collisons if player is moving horizontally.
         if (input.x != 0) {
             HorizontalCollisions(ref input);
         }
-        
+
+        // Update Collisons if player is moving vertically (jumping or falling).
         if (input.y != 0) {
             VerticalCollisions(ref input);
         }
         
+        // Move the player.
         transform.Translate(input);
     }
 
+    /// <summary>
+    /// Handles horizontal movement and damps the x axis in order to provide smooth movement.
+    /// Also applies gravity.
+    /// </summary>
+    /// <param name="input"> The inputted Velocity vector </param>
+
     public void MoveHorizontal(Vector3 input) {
 
-        if (collisionInformation.isAbove || collisionInformation.isBelow) {
-            velocity.y = 0;
-        }
-
+        // Get the velocity we need.
         float targetVelocityX = input.x * MoveSpeed;
+
+        // Value set for smoothing the movement. 
         float xSmoothing = VelocityXSmoothing;
+
+        // Damp the horizontal movement.
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref xSmoothing, collisionInformation.isBelow ? AccelerationTimeGrounded : AccelerationTimeAirborn);
-        velocity.y += Gravity * Time.deltaTime;
+
+        // Move the player using the input velocity vector.
         Move(velocity * Time.deltaTime);
     }
 
     public void ApplyGravity() {
 
-        velocity.y += Gravity * Time.deltaTime;
+        // If we have a collision above the player or below then we reset the velocity (stops velocity from being increased constantly even when grounded)
+        if (collisionInformation.isAbove || collisionInformation.isBelow) {
+            velocity.y = 0;
+        }
+
+        // Apply gravity
+        velocity.y += gravity * Time.deltaTime;
+
         Move(velocity * Time.deltaTime);
     }
 
     public void Jump() {
 
-        velocity.y = jumpVelocity;
-        
-        Move(velocity * Time.deltaTime);
+        if (collisionInformation.isBelow) {
+
+            Debug.Log("Jumping");
+            Debug.Log(jumpVelocity);
+            velocity.y = jumpVelocity;
+            
+            Move(velocity * Time.deltaTime);
+        }
     }
+
+    /// <summary>
+    /// Determines if a collision has occurred on the horizontal axes. Adjusts the velocity vector's appropriate axis if 
+    /// it it's distance between itself and the object is zero (or close to).
+    /// </summary>
 
     void HorizontalCollisions(ref Vector3 velocity) {
 
+        // Determine if the direction is positive or negative
         float directionX = Mathf.Sign(velocity.x);
+
+        // Determine how far the length of the ray needs to be.
         float rayLength = Mathf.Abs(velocity.x) + skinWidth;
-        
 
         for (int i = 0; i < horizontalRayCount; i++) {
 
+            // Detemrine where to start shooting the rays from (bottom left of player or bottom right)
             Vector2 rayOrigin = (directionX == -1) ? rayCastOrigins.bottomLeft : rayCastOrigins.bottomRight;
 
             rayOrigin += Vector2.up * (horizontalRaySpacing * i);
 
+            // Shoot a ray that is looking for objects in the correct layermask.
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, layerMask);
 
             if (hit) {
-
+                // Reduce velocity vector based on its distance from the obstacle collided with. 
                 velocity.x = (hit.distance - skinWidth) * directionX;
                 rayLength = hit.distance;
 
+                // Update the collision information struct to indicate that a collision has occurred.
                 collisionInformation.isLeft = directionX == -1;
                 collisionInformation.isRight = directionX == 1;
             }
 
+            // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.red);
         }
     }
 
+    /// <summary>
+    /// Determines if a collision has occurred on the vertical axes. Adjusts the velocity vector's appropriate axis if 
+    /// it it's distance between itself and the object is zero (or close to).
+    /// </summary>
+  
     void VerticalCollisions(ref Vector3 velocity) {
 
+        // Determine if the direction is positive or negative
         float directionY = Mathf.Sign(velocity.y);
+
+        // Determine how far the length of the ray needs to be.
         float rayLength = Mathf.Abs(velocity.y) + skinWidth;
 
         for (int i = 0; i < verticalRayCount; i++) {
 
+            // Detemrine where to start shooting the rays from (bottom left of player or bottom right)
             Vector2 rayOrigin = (directionY == -1) ? rayCastOrigins.bottomLeft : rayCastOrigins.topLeft;
 
             rayOrigin += Vector2.right * (verticalRaySpacing * i + velocity.x);
 
+            // Shoot a ray that is looking for objects in the correct layermask.
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, layerMask); 
 
             if (hit) {
-
+                // Reduce velocity vector based on its distance from the obstacle collided with. 
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
+                // Update the collision information struct to indicate that a collision has occurred.
                 collisionInformation.isBelow = directionY == -1;
                 collisionInformation.isAbove = directionY == 1;
             }
 
+            // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
         }
     }
