@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
-[RequireComponent(typeof(BoxCollider2D))]
+
 public class Controller2D : MonoBehaviour {
 
     public float Gravity { get { return gravity; } }
@@ -32,10 +32,10 @@ public class Controller2D : MonoBehaviour {
 
     [Header("RayCast Counts")]
     [SerializeField]
-    public int horizontalRayCount;
+    int horizontalRayCount;
 
     [SerializeField]
-    public int verticalRayCount;
+    int verticalRayCount;
 
     [Header("RayCast Spaces")]
     [SerializeField]
@@ -72,11 +72,13 @@ public class Controller2D : MonoBehaviour {
 
     float velocityYSmoothing;
 
+    [Header("Box Collider")]
+    [SerializeField]
     BoxCollider2D boxCollider;
 
     RayCastOrgins rayCastOrigins;
 
-    public CollisionInformation collisionInformation;
+    CollisionInformation collisionInformation;
 
     Vector3 velocity;
 	
@@ -158,8 +160,6 @@ public class Controller2D : MonoBehaviour {
 
         if (collisionInformation.isBelow) {
 
-            Debug.Log("Jumping");
-            Debug.Log(jumpVelocity);
             velocity.y = jumpVelocity;
             
             Move(velocity * Time.deltaTime);
@@ -242,31 +242,49 @@ public class Controller2D : MonoBehaviour {
         }
     }
 
+    /// <summary>
+    /// Realigns the raycast origin points to fit the player sprite.
+    /// </summary>
+
     void UpdateRayCastOrigins() {
 
         Bounds bounds = boxCollider.bounds;
 
+        // Resize the collider.
         CalculateColliderBounds(ref bounds);
 
+        // Get the four corners of the sprite.
         rayCastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
         rayCastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
         rayCastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
         rayCastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
     }
 
+    /// <summary>
+    /// Resizes a collider so that the raycast can be thrown at an offset. 
+    /// </summary>
+    /// <param name="bounds">A reference to the player's collider bounds</param>
+    /// <returns> Returns the resized collider </returns>
+
     Bounds CalculateColliderBounds(ref Bounds bounds) {
 
+        // Shrink the bounds slightly to allow for the raycast to be thrown.
         bounds.Expand(skinWidth * -2);
 
         return bounds;
     }
 
+    /// <summary>
+    /// Determines what the spacing should be between each raycast being shot by the player. Scales with many simultaneous raycasts.
+    /// </summary>
+
     void CalculateRaySpacing() {
 
         Bounds bounds = boxCollider.bounds;
-
+        // Resize the collider.
         CalculateColliderBounds(ref bounds);
 
+        // Clamp both values between 2 and any number.
         horizontalRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
         verticalRayCount = Mathf.Clamp(verticalRayCount, 2, int.MaxValue);
 
@@ -274,11 +292,19 @@ public class Controller2D : MonoBehaviour {
         verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
     }
 
+    /// <summary>
+    /// Data structure used to store all raycast locations. 
+    /// </summary>
+    
     struct RayCastOrgins {
 
         public Vector2 topLeft, topRight;
         public Vector2 bottomLeft, bottomRight;
     }
+
+    /// <summary>
+    /// Data structure determining which directions a collision is occuring in. 
+    /// </summary>
 
     public struct CollisionInformation {
         public bool isBelow, isAbove;
