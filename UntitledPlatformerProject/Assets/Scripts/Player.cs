@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(Controller2D))]
 public class Player : MonoBehaviour {
 
+    [Header("Player Controller")]
+    [SerializeField]
     Controller2D controller;
 
 	void Start () {
@@ -13,17 +14,18 @@ public class Player : MonoBehaviour {
 	}
 
 	void Update () {
-
+        // Apply gravity by default
         controller.ApplyGravity();
 
+        // Get the current axis values and add them to a vector.
         Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"), 0);
-
-        controller.MoveHorizontal(input);
 
         if (Input.GetKeyDown(KeyCode.Space)) {
 
             controller.Jump();
-
         }
+
+        // Use the input vector to move the player.
+        controller.ApplyMovement(input);
     }
 }
