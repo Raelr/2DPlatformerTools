@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -61,7 +62,7 @@ public class Controller2D : MonoBehaviour {
     [SerializeField]
     float accelerationTimeGrounded;
 
-    [Header ("Physics Results")]
+    [Header("Physics Results")]
     [SerializeField]
     [ReadOnly] float jumpVelocity;
 
@@ -75,6 +76,10 @@ public class Controller2D : MonoBehaviour {
     [Header("Box Collider")]
     [SerializeField]
     BoxCollider2D boxCollider;
+
+    [Header("SlopeClimbing")]
+    [SerializeField, Range(0, 360)]
+    float maxClimbAngle;
 
     RayCastOrgins rayCastOrigins;
 
@@ -107,7 +112,7 @@ public class Controller2D : MonoBehaviour {
         UpdateRayCastOrigins();
 
         collisionInformation.Reset();
-        
+
         // Update Collisons if player is moving horizontally.
         if (input.x != 0) {
             HorizontalCollisions(ref input);
@@ -117,7 +122,7 @@ public class Controller2D : MonoBehaviour {
         if (input.y != 0) {
             VerticalCollisions(ref input);
         }
-        
+
         // Move the player.
         transform.Translate(input);
     }
@@ -128,7 +133,7 @@ public class Controller2D : MonoBehaviour {
     /// </summary>
     /// <param name="input"> The inputted Velocity vector </param>
 
-    public void MoveHorizontal(Vector3 input) {
+    public void ApplyMovement(Vector3 input) {
 
         // Get the velocity we need.
         float targetVelocityX = input.x * MoveSpeed;
@@ -150,10 +155,9 @@ public class Controller2D : MonoBehaviour {
             velocity.y = 0;
         }
 
-        // Apply gravity
         velocity.y += gravity * Time.deltaTime;
 
-        Move(velocity * Time.deltaTime);
+        //ApplyMovement(velocity * Time.deltaTime);
     }
 
     public void Jump() {
@@ -162,7 +166,6 @@ public class Controller2D : MonoBehaviour {
 
             velocity.y = jumpVelocity;
             
-            Move(velocity * Time.deltaTime);
         }
     }
 
@@ -171,13 +174,13 @@ public class Controller2D : MonoBehaviour {
     /// it it's distance between itself and the object is zero (or close to).
     /// </summary>
 
-    void HorizontalCollisions(ref Vector3 velocity) {
+    void HorizontalCollisions(ref Vector3 inputVelocity) {
 
         // Determine if the direction is positive or negative
-        float directionX = Mathf.Sign(velocity.x);
+        float directionX = Mathf.Sign(inputVelocity.x);
 
         // Determine how far the length of the ray needs to be.
-        float rayLength = Mathf.Abs(velocity.x) + skinWidth;
+        float rayLength = Mathf.Abs(inputVelocity.x) + skinWidth;
 
         for (int i = 0; i < horizontalRayCount; i++) {
 
@@ -190,15 +193,34 @@ public class Controller2D : MonoBehaviour {
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.right * directionX, rayLength, layerMask);
 
             if (hit) {
-                // Reduce velocity vector based on its distance from the obstacle collided with. 
-                velocity.x = (hit.distance - skinWidth) * directionX;
-                rayLength = hit.distance;
 
-                // Update the collision information struct to indicate that a collision has occurred.
-                collisionInformation.isLeft = directionX == -1;
-                collisionInformation.isRight = directionX == 1;
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+
+                if (i == 0 && slopeAngle <= maxClimbAngle) {
+                    float distanceToStart = 0;
+
+                    if (slopeAngle != collisionInformation.slopeAngleOld) {
+                        distanceToStart = hit.distance - skinWidth;
+                        //inputVelocity.x -= distanceToStart - directionX;
+                    }
+                    ClimbSlope(ref inputVelocity, slopeAngle);
+                    inputVelocity.x += distanceToStart * directionX;
+                }
+
+                if (!collisionInformation.isClimbingSlope || slopeAngle > maxClimbAngle) {
+                    // Reduce velocity vector based on its distance from the obstacle collided with. 
+                    inputVelocity.x = (hit.distance - skinWidth) * directionX;
+                    rayLength = hit.distance;
+
+                    if (collisionInformation.isClimbingSlope) {
+                        inputVelocity.y = Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(inputVelocity.x);
+                    }
+
+                    // Update the collision information struct to indicate that a collision has occurred.
+                    collisionInformation.isLeft = directionX == -1;
+                    collisionInformation.isRight = directionX == 1;
+                }
             }
-
             // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.right * directionX * rayLength, Color.red);
         }
@@ -208,7 +230,7 @@ public class Controller2D : MonoBehaviour {
     /// Determines if a collision has occurred on the vertical axes. Adjusts the velocity vector's appropriate axis if 
     /// it it's distance between itself and the object is zero (or close to).
     /// </summary>
-  
+
     void VerticalCollisions(ref Vector3 velocity) {
 
         // Determine if the direction is positive or negative
@@ -232,6 +254,10 @@ public class Controller2D : MonoBehaviour {
                 velocity.y = (hit.distance - skinWidth) * directionY;
                 rayLength = hit.distance;
 
+                if (collisionInformation.isClimbingSlope) {
+                    velocity.x = velocity.y / Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
+                }
+
                 // Update the collision information struct to indicate that a collision has occurred.
                 collisionInformation.isBelow = directionY == -1;
                 collisionInformation.isAbove = directionY == 1;
@@ -240,6 +266,21 @@ public class Controller2D : MonoBehaviour {
             // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
         }
+    }
+
+    void ClimbSlope(ref Vector3 inputVelocity, float slopeAngle) {
+
+        float moveDistance = Mathf.Abs(inputVelocity.x);
+        float climbVelocityY = Mathf.Sin(slopeAngle * Mathf.Deg2Rad) * moveDistance;
+
+        if (inputVelocity.y <= climbVelocityY) {
+            inputVelocity.y = climbVelocityY;
+            inputVelocity.x = Mathf.Cos(slopeAngle * Mathf.Deg2Rad) * moveDistance * Mathf.Sign(inputVelocity.x);
+
+            collisionInformation.isBelow = true;
+            collisionInformation.isClimbingSlope = true;
+            collisionInformation.slopeAngle = slopeAngle;
+        } 
     }
 
     /// <summary>
@@ -310,9 +351,16 @@ public class Controller2D : MonoBehaviour {
         public bool isBelow, isAbove;
         public bool isRight, isLeft;
 
+        public bool isClimbingSlope;
+        public float slopeAngle, slopeAngleOld;
+
         public void Reset() {
             isBelow = isAbove = false;
             isRight = isLeft = false;
+            isClimbingSlope = false;
+
+            slopeAngleOld = slopeAngle;
+            slopeAngle = 0;
         }
     }
 }

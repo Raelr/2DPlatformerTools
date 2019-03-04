@@ -26,6 +26,6 @@ public class Player : MonoBehaviour {
         }
 
         // Use the input vector to move the player.
-        controller.MoveHorizontal(input);
+        controller.ApplyMovement(input);
     }
 }
