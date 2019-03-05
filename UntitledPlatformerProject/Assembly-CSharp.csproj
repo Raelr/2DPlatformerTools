@@ -61,8 +61,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Scripts\Controller2D.cs" />
-    <Compile Include="Assets\Scripts\Player.cs" />
+    <Compile Include="Assets\Scripts\CameraFollow.cs" />
+    <Compile Include="Assets\Scripts\PlatformerScripts\Controller2D.cs" />
+    <Compile Include="Assets\Scripts\PlatformerScripts\Player.cs" />
+    <Compile Include="Assets\Scripts\PlatformerScripts\Utilities.cs" />
     <Compile Include="Assets\Scripts\ReadOnlyAttribute.cs" />
     <Reference Include="UnityEditor.StandardEvents">
       <HintPath>C:/Users/aryeh/Desktop/Dev/Unity/UntitledPlatformerProject/UntitledPlatformerProject/Library/ScriptAssemblies/UnityEditor.StandardEvents.dll</HintPath>
