@@ -2,9 +2,9 @@
 
 Authors: <b>Aryeh Zinn (Raelr)</b> and <b>William Anthony (WilliamAnth)</b>
 
-This is a basic Unity project featuring platformer mechanics within the Unity engine. The intention is to develop a platformer without using certain inbuilt physics functions and components (like rigidbodies). It should be noted that colliders are used in the project so that raycasts can detect collided objects. 
+This is an experimental project, intended to test the capabilities of implementing platformer physics within Unity. The intention is to develop a platformer without using certain inbuilt physics functions and components (like rigidbodies).
 
-All collision detection is handled via a raycast system which, upon collision with an obstacle, redues velocity to an appropriate amount. The main components of the physics system (as of the current build) are:
+All collision detection is handled via a raycast system which, upon collision with an obstacle, reduces its velocity to an appropriate amount. The main components of the physics system (as of the current build) are:
 
 > <b>Player:</b> Interprets all player inputs into movement.
 
