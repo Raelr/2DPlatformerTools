@@ -45,7 +45,10 @@ public class Player : MonoBehaviour {
             if (SpacePressed()) {
 
                 controller.Jump(ref input);
+
             }
+
+            controller.IsCrouching = Input.GetKey("s") || Input.GetKey("down");
 
             controller.ApplyMovement(input);
         }
@@ -54,7 +57,6 @@ public class Player : MonoBehaviour {
         if (playerMoved != null) {
 
             playerMoved.Invoke();
-
         }
     }
 

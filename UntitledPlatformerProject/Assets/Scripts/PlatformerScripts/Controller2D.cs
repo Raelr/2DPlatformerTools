@@ -5,7 +5,7 @@ using UnityEditor;
 using UnityEngine;
 
 
-public class Controller2D : MonoBehaviour {
+public class Controller2D : RayCastUser {
 
     public float Gravity { get { return gravity; } }
 
@@ -25,25 +25,11 @@ public class Controller2D : MonoBehaviour {
 
     public float AccelerationTimeGrounded { get { return accelerationTimeGrounded; } }
 
-    const float skinWidth = 0.015f;
+    public bool IsCrouching { get; set; }
 
     [Header("Collision Mask")]
     [SerializeField]
     LayerMask layerMask;
-
-    [Header("RayCast Counts")]
-    [SerializeField]
-    int horizontalRayCount;
-
-    [SerializeField]
-    int verticalRayCount;
-
-    [Header("RayCast Spaces")]
-    [SerializeField]
-    [ReadOnly] float horizontalRaySpacing;
-
-    [SerializeField]
-    [ReadOnly] float verticalRaySpacing;
 
     [Header("Physics Configuration")]
 
@@ -73,31 +59,26 @@ public class Controller2D : MonoBehaviour {
 
     float velocityYSmoothing = 0;
 
-    [Header("Box Collider")]
-    [SerializeField]
-    BoxCollider2D boxCollider;
-
     [Header("SlopeClimbing")]
     [SerializeField, Range(0, 360)]
     float maxClimbAngle;
 
-    RayCastOrgins rayCastOrigins;
+    Vector3 velocity;
 
     CollisionInformation collisionInformation;
 
-    Vector3 velocity;
+    Platform currentPlatform;
 
     /// <summary>
     /// Set jump velocity and gravity base don the jump height and timeToJumpApex variables. 
     /// </summary>
 
-    void Start() {
+    public override void Start() {
 
         gravity = -(2 * jumpHeight) / Mathf.Pow(timeToJumpApex, 2);
         jumpVelocity = Mathf.Abs(gravity) * timeToJumpApex;
 
-        boxCollider = GetComponent<BoxCollider2D>();
-        CalculateRaySpacing();
+        base.Start();
 
     }
 
@@ -114,15 +95,17 @@ public class Controller2D : MonoBehaviour {
         collisionInformation.Reset();
 
         // Update Collisons if player is moving horizontally.
-        if (input.x != 0) {
-            HorizontalCollisions(ref input);
-        }
 
-        // Update Collisons if player is moving vertically (jumping or falling).
-        if (input.y != 0) {
-            VerticalCollisions(ref input);
-        }
+            if (input.x != 0) {
+                HorizontalCollisions(ref input);
+            }
 
+            // Update Collisons if player is moving vertically (jumping or falling).
+            if (input.y != 0) {
+                VerticalCollisions(ref input);
+
+        }
+        
         // Move the player.
         transform.Translate(input);
     }
@@ -143,6 +126,10 @@ public class Controller2D : MonoBehaviour {
 
         // Damp the horizontal movement.
         velocity.x = Mathf.SmoothDamp(velocity.x, targetVelocityX, ref xSmoothing, collisionInformation.isBelow ? AccelerationTimeGrounded : AccelerationTimeAirborn);
+
+        if (collisionInformation.isRight || collisionInformation.isLeft) {
+            velocity.x = 0;
+        }
 
         // Move the player using the input velocity vector.
         Move(velocity * Time.deltaTime);
@@ -196,31 +183,41 @@ public class Controller2D : MonoBehaviour {
 
             if (hit) {
 
-                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+                Platform playerPlatform = LevelData.Instance.GetPlatformScript(hit.transform.name);
 
-                if (i == 0 && slopeAngle <= maxClimbAngle) {
-                    float distanceToStart = 0;
+                if (playerPlatform.AllowedToJumpThrough(directionX)) {
 
-                    if (slopeAngle != collisionInformation.slopeAngleOld) {
-                        distanceToStart = hit.distance - skinWidth;
-                        //inputVelocity.x -= distanceToStart - directionX;
-                    }
-                    ClimbSlope(ref inputVelocity, slopeAngle);
-                    inputVelocity.x += distanceToStart * directionX;
-                }
-
-                if (!collisionInformation.isClimbingSlope || slopeAngle > maxClimbAngle) {
-                    // Reduce velocity vector based on its distance from the obstacle collided with. 
-                    inputVelocity.x = (hit.distance - skinWidth) * directionX;
-                    rayLength = hit.distance;
-
-                    if (collisionInformation.isClimbingSlope) {
-                        inputVelocity.y = Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(inputVelocity.x);
+                    if (hit.distance == 0) {
+                        continue;
                     }
 
-                    // Update the collision information struct to indicate that a collision has occurred.
-                    collisionInformation.isLeft = directionX == -1;
-                    collisionInformation.isRight = directionX == 1;
+                } else {
+                    float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+
+                    if (i == 0 && slopeAngle <= maxClimbAngle) {
+                        float distanceToStart = 0;
+
+                        if (slopeAngle != collisionInformation.slopeAngleOld) {
+                            distanceToStart = hit.distance - skinWidth;
+                            //inputVelocity.x -= distanceToStart - directionX;
+                        }
+                        ClimbSlope(ref inputVelocity, slopeAngle);
+                        inputVelocity.x += distanceToStart * directionX;
+                    }
+
+                    if (!collisionInformation.isClimbingSlope || slopeAngle > maxClimbAngle) {
+                        // Reduce velocity vector based on its distance from the obstacle collided with. 
+                        inputVelocity.x = (hit.distance - skinWidth) * directionX;
+                        rayLength = hit.distance;
+
+                        if (collisionInformation.isClimbingSlope) {
+                            inputVelocity.y = Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Abs(inputVelocity.x);
+                        }
+
+                        // Update the collision information struct to indicate that a collision has occurred.
+                        collisionInformation.isLeft = directionX == -1;
+                        collisionInformation.isRight = directionX == 1;
+                    }
                 }
             }
             // Draw a ray for the purposes of debugging
@@ -252,19 +249,29 @@ public class Controller2D : MonoBehaviour {
             RaycastHit2D hit = Physics2D.Raycast(rayOrigin, Vector2.up * directionY, rayLength, layerMask);
 
             if (hit) {
-                // Reduce velocity vector based on its distance from the obstacle collided with. 
-                velocity.y = (hit.distance - skinWidth) * directionY;
-                rayLength = hit.distance;
 
-                if (collisionInformation.isClimbingSlope) {
-                    velocity.x = velocity.y / Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
-                }
+                Platform playerPlatform = LevelData.Instance.GetPlatformScript(hit.transform.name);
 
-                // Update the collision information struct to indicate that a collision has occurred.
-                collisionInformation.isBelow = directionY == -1;
-                collisionInformation.isAbove = directionY == 1;
+                    if (playerPlatform.AllowedToJumpThrough(directionY, true) || IsCrouching && playerPlatform.CanFallThrough()) {
+
+                        if (hit.distance == 0) {
+                            continue;
+                        }
+
+                    } else {
+                        // Reduce velocity vector based on its distance from the obstacle collided with. 
+                        velocity.y = (hit.distance - skinWidth) * directionY;
+                        rayLength = hit.distance;
+
+                        if (collisionInformation.isClimbingSlope) {
+                            velocity.x = velocity.y / Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
+                        }
+
+                        // Update the collision information struct to indicate that a collision has occurred.
+                        collisionInformation.isBelow = directionY == -1;
+                        collisionInformation.isAbove = directionY == 1;
+                    }
             }
-
             // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
         }
@@ -292,66 +299,6 @@ public class Controller2D : MonoBehaviour {
     }
 
     /// <summary>
-    /// Realigns the raycast origin points to fit the player sprite.
-    /// </summary>
-
-    void UpdateRayCastOrigins() {
-
-        Bounds bounds = boxCollider.bounds;
-
-        // Resize the collider.
-        CalculateColliderBounds(ref bounds);
-
-        // Get the four corners of the sprite.
-        rayCastOrigins.bottomLeft = new Vector2(bounds.min.x, bounds.min.y);
-        rayCastOrigins.topLeft = new Vector2(bounds.min.x, bounds.max.y);
-        rayCastOrigins.bottomRight = new Vector2(bounds.max.x, bounds.min.y);
-        rayCastOrigins.topRight = new Vector2(bounds.max.x, bounds.max.y);
-    }
-
-    /// <summary>
-    /// Resizes a collider so that the raycast can be thrown at an offset. 
-    /// </summary>
-    /// <param name="bounds">A reference to the player's collider bounds</param>
-    /// <returns> Returns the resized collider </returns>
-
-    Bounds CalculateColliderBounds(ref Bounds bounds) {
-
-        // Shrink the bounds slightly to allow for the raycast to be thrown.
-        bounds.Expand(skinWidth * -2);
-
-        return bounds;
-    }
-
-    /// <summary>
-    /// Determines what the spacing should be between each raycast being shot by the player. Scales with many simultaneous raycasts.
-    /// </summary>
-
-    void CalculateRaySpacing() {
-
-        Bounds bounds = boxCollider.bounds;
-        // Resize the collider.
-        CalculateColliderBounds(ref bounds);
-
-        // Clamp both values between 2 and any number.
-        horizontalRayCount = Mathf.Clamp(horizontalRayCount, 2, int.MaxValue);
-        verticalRayCount = Mathf.Clamp(verticalRayCount, 2, int.MaxValue);
-
-        horizontalRaySpacing = bounds.size.y / (horizontalRayCount - 1);
-        verticalRaySpacing = bounds.size.x / (verticalRayCount - 1);
-    }
-
-    /// <summary>
-    /// Data structure used to store all raycast locations. 
-    /// </summary>
-
-    struct RayCastOrgins {
-
-        public Vector2 topLeft, topRight;
-        public Vector2 bottomLeft, bottomRight;
-    }
-
-    /// <summary>
     /// Data structure determining which directions a collision is occuring in. 
     /// </summary>
 
@@ -361,6 +308,7 @@ public class Controller2D : MonoBehaviour {
 
         public bool isClimbingSlope;
         public float slopeAngle, slopeAngleOld;
+        public bool isPlatform;
 
         public void Reset() {
             isBelow = isAbove = false;
@@ -369,6 +317,7 @@ public class Controller2D : MonoBehaviour {
 
             slopeAngleOld = slopeAngle;
             slopeAngle = 0;
+            isPlatform = false;
         }
     }
 }
