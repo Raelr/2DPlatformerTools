@@ -62,8 +62,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\CameraFollow.cs" />
+    <Compile Include="Assets\Scripts\LevelData.cs" />
     <Compile Include="Assets\Scripts\PlatformerScripts\Controller2D.cs" />
-    <Compile Include="Assets\Scripts\PlatformerScripts\Platform.cs" />
+    <Compile Include="Assets\Scripts\PlatformerScripts\Platforms\OneWayPlatform.cs" />
+    <Compile Include="Assets\Scripts\PlatformerScripts\Platforms\Platform.cs" />
+    <Compile Include="Assets\Scripts\PlatformerScripts\Platforms\SolidPlatform.cs" />
     <Compile Include="Assets\Scripts\PlatformerScripts\Player.cs" />
     <Compile Include="Assets\Scripts\PlatformerScripts\RayCastUser.cs" />
     <Compile Include="Assets\Scripts\PlatformerScripts\Utilities.cs" />
