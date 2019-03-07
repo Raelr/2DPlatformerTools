@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class LevelData : MonoBehaviour {
 
-    Dictionary<string, Platform> platforms = new Dictionary<string, Platform>();
+    Dictionary<Collider2D, Platform> platforms = new Dictionary<Collider2D, Platform>();
 
     public static LevelData Instance;
 
@@ -18,7 +18,6 @@ public class LevelData : MonoBehaviour {
     void Start () {
 
         InitialiseAllPlatforms();
-
 	}
 
     void InitialiseAllPlatforms() {
@@ -35,7 +34,9 @@ public class LevelData : MonoBehaviour {
 
             allObstacles[i].name = name;
 
-            platforms.Add(name, platformScript);
+            Collider2D collider = allObstacles[i].GetComponent<Collider2D>();
+
+            platforms.Add(collider, platformScript);
         }
     }
 
@@ -44,8 +45,8 @@ public class LevelData : MonoBehaviour {
         name = name + amount;
     }
 
-    public Platform GetPlatformScript(string name) {
+    public Platform GetPlatformScript(Collider2D collider) {
 
-        return platforms.ContainsKey(name) == true ? platforms[name] : null;
+        return platforms.ContainsKey(collider) == true ? platforms[collider] : null;
     }
 }
