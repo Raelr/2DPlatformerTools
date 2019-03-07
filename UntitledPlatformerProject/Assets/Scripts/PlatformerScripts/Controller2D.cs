@@ -67,6 +67,8 @@ public class Controller2D : RayCastUser {
 
     CollisionInformation collisionInformation;
 
+    Collider2D currentPlatformCollider;
+
     Platform currentPlatform;
 
     /// <summary>
@@ -96,16 +98,16 @@ public class Controller2D : RayCastUser {
 
         // Update Collisons if player is moving horizontally.
 
-            if (input.x != 0) {
-                HorizontalCollisions(ref input);
-            }
+        if (input.x != 0) {
+            HorizontalCollisions(ref input);
+        }
 
-            // Update Collisons if player is moving vertically (jumping or falling).
-            if (input.y != 0) {
-                VerticalCollisions(ref input);
+        // Update Collisons if player is moving vertically (jumping or falling).
+        if (input.y != 0) {
+            VerticalCollisions(ref input);
 
         }
-        
+
         // Move the player.
         transform.Translate(input);
     }
@@ -183,9 +185,9 @@ public class Controller2D : RayCastUser {
 
             if (hit) {
 
-                Platform playerPlatform = LevelData.Instance.GetPlatformScript(hit.transform.name);
+                CheckCurrentCollider(hit);
 
-                if (playerPlatform.AllowedToJumpThrough(directionX)) {
+                if (currentPlatform.AllowedToJumpThrough(directionX)) {
 
                     if (hit.distance == 0) {
                         continue;
@@ -250,27 +252,27 @@ public class Controller2D : RayCastUser {
 
             if (hit) {
 
-                Platform playerPlatform = LevelData.Instance.GetPlatformScript(hit.transform.name);
+                CheckCurrentCollider(hit);
 
-                    if (playerPlatform.AllowedToJumpThrough(directionY, true) || IsCrouching && playerPlatform.CanFallThrough()) {
+                if (currentPlatform.AllowedToJumpThrough(directionY, true) || IsCrouching && currentPlatform.CanFallThrough()) {
 
-                        if (hit.distance == 0) {
-                            continue;
-                        }
-
-                    } else {
-                        // Reduce velocity vector based on its distance from the obstacle collided with. 
-                        velocity.y = (hit.distance - skinWidth) * directionY;
-                        rayLength = hit.distance;
-
-                        if (collisionInformation.isClimbingSlope) {
-                            velocity.x = velocity.y / Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
-                        }
-
-                        // Update the collision information struct to indicate that a collision has occurred.
-                        collisionInformation.isBelow = directionY == -1;
-                        collisionInformation.isAbove = directionY == 1;
+                    if (hit.distance == 0) {
+                        continue;
                     }
+
+                } else {
+                    // Reduce velocity vector based on its distance from the obstacle collided with. 
+                    velocity.y = (hit.distance - skinWidth) * directionY;
+                    rayLength = hit.distance;
+
+                    if (collisionInformation.isClimbingSlope) {
+                        velocity.x = velocity.y / Mathf.Tan(collisionInformation.slopeAngle * Mathf.Deg2Rad) * Mathf.Sign(velocity.x);
+                    }
+
+                    // Update the collision information struct to indicate that a collision has occurred.
+                    collisionInformation.isBelow = directionY == -1;
+                    collisionInformation.isAbove = directionY == 1;
+                }
             }
             // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
@@ -295,6 +297,15 @@ public class Controller2D : RayCastUser {
             collisionInformation.isBelow = true;
             collisionInformation.isClimbingSlope = true;
             collisionInformation.slopeAngle = slopeAngle;
+        }
+    }
+
+    void CheckCurrentCollider(RaycastHit2D hit) {
+
+        if (hit.collider != currentPlatformCollider) {
+
+            currentPlatformCollider = hit.collider;
+            currentPlatform = hit.transform.GetComponent<Platform>();
         }
     }
 
