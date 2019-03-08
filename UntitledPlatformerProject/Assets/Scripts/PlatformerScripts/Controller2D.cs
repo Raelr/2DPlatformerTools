@@ -160,6 +160,15 @@ public class Controller2D : RayCastUser {
         }
     }
 
+    public void Crouch(bool newIsCrouching) {
+
+        if (collisionInformation.isBelow) {
+            if (IsCrouching != newIsCrouching) {
+                IsCrouching = newIsCrouching;
+            }
+        }
+    }
+
     /// <summary>
     /// Determines if a collision has occurred on the horizontal axes. Adjusts the velocity vector's appropriate axis if 
     /// it it's distance between itself and the object is zero (or close to).

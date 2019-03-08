@@ -48,7 +48,9 @@ public class Player : MonoBehaviour {
 
             }
 
-            controller.IsCrouching = Input.GetKey("s") || Input.GetKey("down");
+            bool crouching = Input.GetKey("s") || Input.GetKey("down");
+
+            controller.Crouch(crouching);
 
             controller.ApplyMovement(input);
         }
