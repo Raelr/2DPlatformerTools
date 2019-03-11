@@ -22,7 +22,7 @@ GameObject:
   - component: {fileID: 212197130777933746}
   - component: {fileID: 114041791139645314}
   - component: {fileID: 61494218272220234}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: tiles_bridge_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
