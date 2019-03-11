@@ -4,10 +4,14 @@ using UnityEngine;
 
 public class TileGrid : MonoBehaviour {
 
+    public Vector2 GridDimensions { get { return gridDimensions; } set { gridDimensions = value; CalulateTilePlacement();} }
+
+    public int SpotsToBeFilled { get { return spotsToBeFilled; } }
 
     [System.Serializable]
     public class Row {
 
+        [SerializeField]
         public Tile[] Tiles { get { return gridTiles; } }
 
         public Row(int rowSize) {
@@ -22,6 +26,8 @@ public class TileGrid : MonoBehaviour {
         }
 
     }
+
+    public static TileGrid instance;
 
     [Header("WorldGrid")]
     [SerializeField]
@@ -47,27 +53,62 @@ public class TileGrid : MonoBehaviour {
     [SerializeField]
     [ReadOnly]int rowSize;
 
+    [SerializeField]
+    [ReadOnly] int spotsToBeFilled;
 
+    void AddRows() {
 
-    // Use this for initialization
-    void Awake () {
-
-        CalulateTilePlacement();
-        CreateGrid();
-
+        if (worldGrid.Length > 0) {
+            for (int i = 0; i < rowCount; i++) {
+                worldGrid[i] = new Row(rowSize);
+            }
+        } else {
+            Debug.LogError("There are no rows in the grid!");
+        } 
     }
 
-    void CreateGrid() {
+    public Tile GetTile(Vector3 coordinates) {
 
-        worldGrid = new Row[rowCount];
+        Tile gridTile = null;
+
+        if (coordinates.x < rowCount && coordinates.y < rowSize) {
+
+            int coordinateX = Mathf.RoundToInt(coordinates.x);
+            int coordinateY = Mathf.RoundToInt(coordinates.y);
+
+            if (worldGrid[coordinateX] != null) {
+                if (worldGrid[coordinateX].Tiles[coordinateY] != null) {
+                    gridTile = worldGrid[coordinateX].Tiles[coordinateY];
+                }
+            }
+        }
+
+        return gridTile;
+    }
+
+    public void AddTile(Tile tile) {
 
         Vector3 gridBottomLeft = transform.position - Vector3.right * gridDimensions.x / 2 - Vector3.up * gridDimensions.y / 2;
 
-        for (int i = 0; i < worldGrid.Length; i++) {
-            worldGrid[i] = new Row(rowSize);
-            for (int j = 0; j < worldGrid[i].Tiles.Length; j++) {
-                Vector3 worldPoint = gridBottomLeft + Vector3.right * (i * tileArea + tileRadius) + Vector3.up * (j * tileArea + tileRadius);
-                worldGrid[i].Tiles[j] = new Tile(worldPoint);
+        if (worldGrid.Length > 0) {
+            for (int i = 0; i < worldGrid.Length; i++) {
+                Row currentRow = worldGrid[i];
+                if (currentRow != null && currentRow.Tiles.Length > 0) {
+                    for (int x = 0; x < currentRow.Tiles.Length; x++) {
+                        if (currentRow.Tiles[x] == null) {
+
+                            Vector3 worldPosition = gridBottomLeft + Vector3.right * (i * tileArea + tileRadius) + Vector3.up * (x * tileArea + tileRadius);
+                            Tile inputTile = Instantiate(tile, worldPosition, Quaternion.identity);
+                            inputTile.WorldPosition = worldPosition;
+                            currentRow.Tiles[x] = inputTile;
+                            spotsToBeFilled--;
+                            return;
+
+                        } else {
+                            continue;
+                        }
+                    }
+                }
             }
         }
     }
@@ -78,6 +119,12 @@ public class TileGrid : MonoBehaviour {
 
         rowCount = Mathf.RoundToInt(gridDimensions.x / tileArea);
         rowSize = Mathf.RoundToInt(gridDimensions.y / tileArea);
+
+        worldGrid = new Row[rowCount];
+
+        spotsToBeFilled = rowSize * rowCount;
+
+        AddRows();
     }
 
     private void OnDrawGizmos() {
@@ -89,7 +136,9 @@ public class TileGrid : MonoBehaviour {
                 for (int i = 0; i < worldGrid.Length; i++) {
                     if (worldGrid[i].Tiles.Length > 0) {
                         for (int j = 0; j < worldGrid[i].Tiles.Length; j++) {
-                            Gizmos.DrawWireCube(worldGrid[i].Tiles[j].WorldPosition, Vector3.one);
+                            if (worldGrid[i].Tiles[j] != null) {
+                                Gizmos.DrawWireCube(worldGrid[i].Tiles[j].WorldPosition, Vector3.one);
+                            }
                         }
                     }
                 }
