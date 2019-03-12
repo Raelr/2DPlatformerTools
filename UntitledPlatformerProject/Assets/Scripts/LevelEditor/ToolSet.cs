@@ -14,43 +14,84 @@ public class ToolSet : MonoBehaviour {
     TextMeshPro text;
 
     [SerializeField]
-    LayerMask layerMask;
+    LayerMask tileLayerMask;
+
+    [SerializeField]
+    LayerMask levelGridMask;
 
     [SerializeField]
     int rayLength;
 
-    bool clicked;
+    [SerializeField]
+    SelectionBar selection;
+
+    [SerializeField]
+    LevelGrid grid;
+
+    bool isClicked;
+
+    bool isHoveringOverLevel;
 
     Vector2 mousePosition;
+
+    private void Awake() {
+
+        isClicked = false;
+        isHoveringOverLevel = false;
+
+        grid = GetComponent<LevelGrid>();
+        selection = GetComponent<SelectionBar>();
+    }
 
     private void Update() {
 
         CheckMouseinput();
     }
 
-    void MouseHover() {
+    void MouseHoverSelection() {
 
         RaycastHit2D hit;
 
-        hit = Physics2D.Raycast(mousePosition, Vector2.up * rayLength, layerMask);
+        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, tileLayerMask);
 
         if (hit) {
 
             UpdateText(hit.transform.name);
 
-            if (clicked) {
+            if (isClicked) {
 
                 if (currentTileCollider != hit.collider) {
 
                     currentTileCollider = hit.collider;
                     currentTile = hit.transform.GetComponent<Tile>();
+
+                    isClicked = false;
+                    isHoveringOverLevel = false;
                 }
             }
-
-            clicked = false;
-
         } else {
-            UpdateText("None");
+
+            if (currentTile == null) {
+                UpdateText("None");
+            }
+
+            isClicked = false;
+            isHoveringOverLevel = false;
+        }
+    }
+
+    void MouseHoverLevel() {
+
+        RaycastHit2D hit;
+
+        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, levelGridMask);
+
+        if (!hit) {
+
+            isHoveringOverLevel = true;
+        } else {
+
+            isHoveringOverLevel = false;
         }
     }
 
@@ -58,18 +99,51 @@ public class ToolSet : MonoBehaviour {
 
         Vector2 currentMousePosition = GetMousePosition();
 
-        if (currentMousePosition != mousePosition) {
+        MouseHoverLevel();
 
-            mousePosition = currentMousePosition;
+        if (Input.GetKeyDown(KeyCode.Mouse0)) {
 
-            if (Input.GetKeyDown(KeyCode.Mouse0)) {
+            isClicked = true;
 
-                clicked = true;
+            if (isHoveringOverLevel) {
+
+                CreateTile();
             }
 
+        } else if (Input.GetKeyDown(KeyCode.Mouse1)) {
 
-            MouseHover();
+            ResetBrush();
         }
+
+        MouseHoverSelection();
+    }
+
+    void CreateTile() {
+
+        if (currentTile != null) {
+
+            RaycastHit2D hit;
+
+            hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, levelGridMask);
+
+            if (!hit) {
+
+                if (isClicked) {
+
+                    Vector3 coordinates = GetMousePosition();
+
+                    Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
+                    Tile tile = Instantiate(currentTile, roundedMouseCoordinates, Quaternion.identity);
+                    grid.AddTile(roundedMouseCoordinates, tile);
+                }
+            }
+        }
+    }
+
+    void ResetBrush() {
+
+        currentTile = null;
+        UpdateText("None");
     }
 
     void UpdateText(string name) {

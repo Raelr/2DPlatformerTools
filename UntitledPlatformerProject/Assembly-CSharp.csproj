@@ -63,6 +63,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Scripts\LevelData.cs" />
+    <Compile Include="Assets\Scripts\LevelEditor\LevelGrid.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\SelectionBar.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\Tile.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\TileGrid.cs" />

@@ -162,9 +162,13 @@ public class Controller2D : RayCastUser {
 
     public void Crouch(bool newIsCrouching) {
 
-        if (collisionInformation.isBelow) {
-            if (IsCrouching != newIsCrouching) {
-                IsCrouching = newIsCrouching;
+        if (IsCrouching != newIsCrouching) {
+            if (newIsCrouching) {
+                if (collisionInformation.isBelow) {
+                    IsCrouching = true;
+                }
+            } else {
+                IsCrouching = false;
             }
         }
     }
@@ -196,11 +200,8 @@ public class Controller2D : RayCastUser {
 
                 CheckCurrentCollider(hit);
 
-                if (currentPlatform.AllowedToJumpThrough(directionX)) {
-
-                    if (hit.distance == 0) {
-                        continue;
-                    }
+                if (currentPlatform.AllowedToJumpThrough(directionX) || hit.distance == 0) {
+                    continue;
 
                 } else {
                     float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
@@ -263,11 +264,9 @@ public class Controller2D : RayCastUser {
 
                 CheckCurrentCollider(hit);
 
-                if (currentPlatform.AllowedToJumpThrough(directionY, true) || IsCrouching && currentPlatform.CanFallThrough()) {
+                if (currentPlatform.AllowedToJumpThrough(directionY, true) || IsCrouching && currentPlatform.CanFallThrough() || hit.distance == 0) {
 
-                    if (hit.distance == 0) {
                         continue;
-                    }
 
                 } else {
                     // Reduce velocity vector based on its distance from the obstacle collided with. 
@@ -282,6 +281,9 @@ public class Controller2D : RayCastUser {
                     collisionInformation.isBelow = directionY == -1;
                     collisionInformation.isAbove = directionY == 1;
                 }
+            } else {
+                currentPlatform = null;
+                currentPlatformCollider = null;
             }
             // Draw a ray for the purposes of debugging
             Debug.DrawRay(rayOrigin, Vector2.up * directionY * rayLength, Color.red);
