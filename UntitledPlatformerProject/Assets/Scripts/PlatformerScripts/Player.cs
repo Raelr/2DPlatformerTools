@@ -34,6 +34,16 @@ public class Player : MonoBehaviour {
         // Get the current axis values and add them to a vector.
         FindAxes();
 
+        bool crouching;
+
+        if (Input.GetKey("s") || Input.GetKey("down")) {
+            crouching = true;
+        } else {
+            crouching = false;
+        }
+
+        controller.Crouch(crouching);
+
         if (IsStill() && !SpacePressed()) {
             // If we arent moving then just apply gravity normally.
             controller.ApplyGravity(ref input, true);
@@ -47,10 +57,6 @@ public class Player : MonoBehaviour {
                 controller.Jump(ref input);
 
             }
-
-            bool crouching = Input.GetKey("s") || Input.GetKey("down");
-
-            controller.Crouch(crouching);
 
             controller.ApplyMovement(input);
         }
