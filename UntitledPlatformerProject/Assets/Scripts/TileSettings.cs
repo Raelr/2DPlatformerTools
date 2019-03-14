@@ -5,7 +5,14 @@ using UnityEngine;
 [CreateAssetMenu (fileName = "New Tile", menuName = "Tiles")]
 public class TileSettings : ScriptableObject
 {
-    public int Id;
+    public int id;
+    public enum TilePositioning{
 
+        Background,
+        MidGround,
+        Foreground
+    }
+
+    public TilePositioning tilePositioning;
 
 }

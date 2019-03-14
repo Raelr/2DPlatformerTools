@@ -37,6 +37,12 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     PlaceHolderTile placeHolder;
 
+    Vector2 velocity;
+
+    public delegate void LevelEditorMovedHandler(Vector2 velocity);
+
+    public event LevelEditorMovedHandler cameraMoved;
+
     private void Awake() {
 
         isClicked = false;
@@ -69,7 +75,6 @@ public class ToolSet : MonoBehaviour {
                     currentTileCollider = hit.collider;
                     currentTile = hit.transform.GetComponent<SelectionTile>();
 
-                    isClicked = false;
                     isHoveringOverLevel = false;
                 }
             }
@@ -79,7 +84,6 @@ public class ToolSet : MonoBehaviour {
                 UpdateText("None");
             }
 
-            isClicked = false;
             isHoveringOverLevel = false;
         }
     }
@@ -100,6 +104,8 @@ public class ToolSet : MonoBehaviour {
     }
 
     void CheckMouseinput() {
+
+        isClicked = false;
 
         Vector2 currentMousePosition = GetMousePosition();
 
@@ -140,7 +146,7 @@ public class ToolSet : MonoBehaviour {
                     PlaceHolderTile tile = Instantiate(placeHolder, roundedMouseCoordinates, Quaternion.identity);
                     tile.Renderer.sprite = currentTile.Renderer.sprite;
 
-                    //AssignSortingLayer(ref tile);
+                    AssignSortingLayer(ref tile, currentTile.Positioning);
                     tile.gameObject.name = tile.gameObject.name.Split('(')[0];
                     grid.AddTile(roundedMouseCoordinates, tile);
                 }
@@ -170,12 +176,12 @@ public class ToolSet : MonoBehaviour {
 
             return false;
         }
-        
+
     }
 
-    void AssignSortingLayer(ref Tile tile) {
+    void AssignSortingLayer(ref PlaceHolderTile tile, TileSettings.TilePositioning positioning) {
 
-        tile.Renderer.sortingOrder = (int)tile.position;
+        tile.Renderer.sortingOrder = (int)positioning;
     }
 
     void ResetBrush() {
