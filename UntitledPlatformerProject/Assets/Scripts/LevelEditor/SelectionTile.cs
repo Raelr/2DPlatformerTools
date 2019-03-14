@@ -8,6 +8,8 @@ public class SelectionTile : Icon {
 
     public Vector3 WorldPosition { get { return worldPosition; } set { worldPosition = value; } }
 
+    public TileSettings.TilePositioning Positioning { get; set; }
+
     [SerializeField, ReadOnly]
     SpriteRenderer renderer;
 

@@ -157,11 +157,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 86095984}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -1}
-  m_LocalScale: {x: 0.2, y: 0.058400955, z: 1}
+  m_LocalPosition: {x: -12.186, y: -0.017, z: 0}
+  m_LocalScale: {x: 1.0547078, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 1745661453}
-  m_RootOrder: 0
+  m_Father: {fileID: 0}
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &678980621
 GameObject:
@@ -239,7 +239,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 678980621}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 0.39, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -441,12 +441,12 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 770532086}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -535,6 +535,44 @@ MonoBehaviour:
       sprite: {fileID: 21300028, guid: 1d29badc7514907498754065b3acec55, type: 3}
     - id: 1
       sprite: {fileID: 21300030, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300032, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300034, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300036, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300038, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300040, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300042, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300044, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300046, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300048, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300054, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300056, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300058, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300060, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300058, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 1
+      sprite: {fileID: 21300060, guid: 1d29badc7514907498754065b3acec55, type: 3}
+  - settings: {fileID: 11400000, guid: 89289fc695325b748a577e5a546192c4, type: 2}
+    tiles:
+    - id: 0
+      sprite: {fileID: 21300024, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 0
+      sprite: {fileID: 21300050, guid: 1d29badc7514907498754065b3acec55, type: 3}
+    - id: 0
+      sprite: {fileID: 21300052, guid: 1d29badc7514907498754065b3acec55, type: 3}
   assetUrl: Assets/AssetBundles/tileimages
   tilePrefab: {fileID: 538341188780111723, guid: 78eb319f0888a9e47ac74a8d7d638035,
     type: 3}
@@ -685,11 +723,10 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1745661449}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -12.339, y: -0.017, z: 1}
-  m_LocalScale: {x: 5.5804644, y: 17.123009, z: 1}
-  m_Children:
-  - {fileID: 86095986}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -12.186, y: -0.017, z: 1}
+  m_LocalScale: {x: 5.2735386, y: 17.123009, z: 1}
+  m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

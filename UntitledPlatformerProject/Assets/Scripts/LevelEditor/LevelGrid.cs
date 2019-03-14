@@ -23,7 +23,6 @@ public class LevelGrid : MonoBehaviour {
 
     public void RemoveTile(Vector2 coordinates) {
 
-
         if (tiles.ContainsKey(coordinates)) {
             PlaceHolderTile oldTile = tiles[coordinates];
             Destroy(oldTile.gameObject);

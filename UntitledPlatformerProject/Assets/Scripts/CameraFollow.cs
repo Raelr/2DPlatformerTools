@@ -15,22 +15,31 @@ public class CameraFollow : MonoBehaviour {
 
     Vector3 moveVelocity;
 
+    Vector2 moveVelocity2D;
+
+    float velocity;
+
     [SerializeField]
     float smoothCameraTiming;
 
     Vector3 oldPosition;
 
+    [SerializeField]
+    float cameraPanSpeed;
 
     private void Awake() {
 
-        transform.position = cameraFocus.position + cameraOffset;
-
+        if (cameraFocus != null) {
+            transform.position = cameraFocus.position + cameraOffset;
+        }
     }
 
     void Start() {
 
-        FollowPlayer();
-        player.playerMoved += FollowPlayer;
+        if (player != null) {
+            player.playerMoved += FollowPlayer;
+            FollowPlayer();
+        }
     }
 
     public void FollowPlayer() {
@@ -41,9 +50,20 @@ public class CameraFollow : MonoBehaviour {
 
             Vector3 smoothMove = Vector3.SmoothDamp(transform.position, cameraPosition, ref moveVelocity, smoothCameraTiming);
 
-            transform.position = smoothMove;
+            transform.Translate(smoothMove);
 
             oldPosition = cameraFocus.position;
         }
+    }
+
+    public void MoveCamera(Vector2 newPosition) {
+
+        Vector2 desiredLocation = newPosition * cameraPanSpeed;
+
+        Vector2 smoothPosition = Vector2.SmoothDamp(newPosition, desiredLocation, ref moveVelocity2D, smoothCameraTiming);
+
+        Vector2 coordinates = smoothPosition * Time.deltaTime;
+
+        transform.Translate(coordinates);
     }
 }

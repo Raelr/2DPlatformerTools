@@ -58,7 +58,7 @@ public class SelectionBar : MonoBehaviour {
                 if (settings.tiles.Length > 0) {
                     for (int x = 0; x < settings.tiles.Length; x++) {
                         SelectableTile tile = settings.tiles[x];
-                        currentGrid.AddTile(tilePrefab, tile.sprite);
+                        currentGrid.AddTile(tilePrefab, tile.sprite, settings.settings);
                     }
                 }
             }
@@ -67,14 +67,6 @@ public class SelectionBar : MonoBehaviour {
 
     [System.Serializable]
     public struct SelectableTile {
-
-        public enum TileType {
-
-            Solid,
-            OneWay,
-            Background,
-            Foreground
-        }
 
         public float id;
         public Sprite sprite;
