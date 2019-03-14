@@ -19,9 +19,9 @@ TagManager:
   - Platform
   - Tile
   - LevelGrid
-  - 
-  - 
-  - 
+  - Background
+  - Foreground
+  - Selectable
   - 
   - 
   - 
