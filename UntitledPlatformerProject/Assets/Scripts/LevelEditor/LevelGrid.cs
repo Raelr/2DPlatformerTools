@@ -4,15 +4,15 @@ using UnityEngine;
 
 public class LevelGrid : MonoBehaviour {
 
-    public Dictionary<Vector2, Tile> Tiles { get { return tiles; } }
+    public Dictionary<Vector2, PlaceHolderTile> Tiles { get { return tiles; } }
     public float TileSpacing { get { return tileSpacing; } }
 
-    Dictionary<Vector2, Tile> tiles = new Dictionary<Vector2, Tile>();
+    Dictionary<Vector2, PlaceHolderTile> tiles = new Dictionary<Vector2, PlaceHolderTile>();
 
     [SerializeField]
     float tileSpacing;
 
-    public void AddTile(Vector2 coordinates, Tile tile) {
+    public void AddTile(Vector2 coordinates, PlaceHolderTile tile) {
 
         if (tiles.ContainsKey(coordinates)) {
             RemoveTile(coordinates);
@@ -25,7 +25,7 @@ public class LevelGrid : MonoBehaviour {
 
 
         if (tiles.ContainsKey(coordinates)) {
-            Tile oldTile = tiles[coordinates];
+            PlaceHolderTile oldTile = tiles[coordinates];
             Destroy(oldTile.gameObject);
             tiles.Remove(coordinates);
         }

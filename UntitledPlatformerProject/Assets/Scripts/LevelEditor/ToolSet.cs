@@ -8,7 +8,7 @@ public class ToolSet : MonoBehaviour {
     Collider2D currentTileCollider;
 
     [SerializeField]
-    [ReadOnly] Tile currentTile;
+    SelectionTile currentTile;
 
     [SerializeField]
     TextMeshPro text;
@@ -34,12 +34,16 @@ public class ToolSet : MonoBehaviour {
 
     Vector2 mousePosition;
 
+    [SerializeField]
+    PlaceHolderTile placeHolder;
+
     private void Awake() {
 
         isClicked = false;
         isHoveringOverLevel = false;
 
         grid = GetComponent<LevelGrid>();
+
         selection = GetComponent<SelectionBar>();
     }
 
@@ -63,7 +67,7 @@ public class ToolSet : MonoBehaviour {
                 if (currentTileCollider != hit.collider) {
 
                     currentTileCollider = hit.collider;
-                    currentTile = hit.transform.GetComponent<Tile>();
+                    currentTile = hit.transform.GetComponent<SelectionTile>();
 
                     isClicked = false;
                     isHoveringOverLevel = false;
@@ -101,7 +105,7 @@ public class ToolSet : MonoBehaviour {
 
         MouseHoverLevel();
 
-        if (Input.GetKeyDown(KeyCode.Mouse0)) {
+        if (Input.GetKey(KeyCode.Mouse0)) {
 
             isClicked = true;
 
@@ -133,11 +137,45 @@ public class ToolSet : MonoBehaviour {
                     Vector3 coordinates = GetMousePosition();
 
                     Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
-                    Tile tile = Instantiate(currentTile, roundedMouseCoordinates, Quaternion.identity);
+                    PlaceHolderTile tile = Instantiate(placeHolder, roundedMouseCoordinates, Quaternion.identity);
+                    tile.Renderer.sprite = currentTile.Renderer.sprite;
+
+                    //AssignSortingLayer(ref tile);
+                    tile.gameObject.name = tile.gameObject.name.Split('(')[0];
                     grid.AddTile(roundedMouseCoordinates, tile);
                 }
             }
         }
+    }
+
+    bool IsSameTile(Collider2D collider) {
+
+        if (currentTile != null) {
+
+            string currentTileName = currentTile.gameObject.name;
+
+            string shortenedCurrentName = currentTileName.Split('(')[0];
+
+            //Debug.Log(shortenedCurrentName);
+
+            string tileName = collider.gameObject.name;
+
+            string shortenedTileName = tileName.Split('(')[0];
+
+            return currentTileName == shortenedTileName;
+
+            //Debug.Log(currentTileName);
+
+        } else {
+
+            return false;
+        }
+        
+    }
+
+    void AssignSortingLayer(ref Tile tile) {
+
+        tile.Renderer.sortingOrder = (int)tile.position;
     }
 
     void ResetBrush() {
