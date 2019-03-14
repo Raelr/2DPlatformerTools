@@ -49,11 +49,11 @@ public class Controller2D : RayCastUser {
     float accelerationTimeGrounded;
 
     [Header("Physics Results")]
-    [SerializeField]
-    [ReadOnly] float jumpVelocity;
+    [SerializeField, ReadOnly]
+    float jumpVelocity;
 
-    [SerializeField]
-    [ReadOnly] float gravity;
+    [SerializeField, ReadOnly]
+    float gravity;
 
     float velocityXSmoothing = 0;
 

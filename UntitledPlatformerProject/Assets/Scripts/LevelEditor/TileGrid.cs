@@ -12,16 +12,16 @@ public class TileGrid : MonoBehaviour {
     public class Row {
 
         [SerializeField]
-        public Tile[] Tiles { get { return gridTiles; } }
+        public SelectionTile[] Tiles { get { return gridTiles; } }
 
         public Row(int rowSize) {
 
-            gridTiles = new Tile[rowSize];
+            gridTiles = new SelectionTile[rowSize];
         }
 
-        Tile[] gridTiles;
+        SelectionTile[] gridTiles;
 
-        public Tile GetTile(int index) {
+        public SelectionTile GetTile(int index) {
             return gridTiles[index] != null ? gridTiles[index] : null;
         }
 
@@ -39,7 +39,7 @@ public class TileGrid : MonoBehaviour {
     bool showGrid;
 
     [SerializeField]
-    [ReadOnly] float tileArea;
+    float tileArea;
 
     [SerializeField]
     Vector2 gridDimensions;
@@ -67,9 +67,9 @@ public class TileGrid : MonoBehaviour {
         } 
     }
 
-    public Tile GetTile(Vector3 coordinates) {
+    public SelectionTile GetTile(Vector3 coordinates) {
 
-        Tile gridTile = null;
+        SelectionTile gridTile = null;
 
         if (coordinates.x < rowCount && coordinates.y < rowSize) {
 
@@ -86,7 +86,7 @@ public class TileGrid : MonoBehaviour {
         return gridTile;
     }
 
-    public void AddTile(Tile tile) {
+    public void AddTile(SelectionTile tile, Sprite sprite) {
 
         Vector3 gridBottomLeft = transform.position - Vector3.right * gridDimensions.x / 2 - Vector3.up * gridDimensions.y / 2;
 
@@ -98,8 +98,12 @@ public class TileGrid : MonoBehaviour {
                         if (currentRow.Tiles[x] == null) {
 
                             Vector3 worldPosition = gridBottomLeft + Vector3.right * (i * tileArea + tileRadius) + Vector3.up * (x * tileArea + tileRadius);
-                            Tile inputTile = Instantiate(tile, worldPosition, Quaternion.identity);
+                            SelectionTile inputTile = Instantiate(tile, worldPosition, Quaternion.identity);
+
                             inputTile.WorldPosition = worldPosition;
+                            inputTile.Renderer.sprite = sprite;
+                            inputTile.gameObject.name = sprite.name;
+
                             currentRow.Tiles[x] = inputTile;
                             spotsToBeFilled--;
                             return;

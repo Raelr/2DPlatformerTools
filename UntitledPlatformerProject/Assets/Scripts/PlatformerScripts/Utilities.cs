@@ -20,5 +20,7 @@ public class Utilities : MonoBehaviour {
         equals = distance < 0.00000001 ? true : false;
 
         return equals;
-    }
+    }  
 }
+
+public class ReadOnlyAttribute : PropertyAttribute { }
