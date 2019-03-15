@@ -6,25 +6,36 @@ using TMPro;
 public class ToolSet : MonoBehaviour {
 
     Collider2D currentTileCollider;
-
-    [SerializeField]
+    [Header("Tool Settings")]
+    [SerializeField, ReadOnly]
     SelectionTile currentTile;
 
+    [SerializeField, ReadOnly]
+    TileSettings settings;
+
+    [Header("Tile Name Text")]
     [SerializeField]
     TextMeshPro text;
 
+    [Header("Layer Masks")]
     [SerializeField]
-    LayerMask tileLayerMask;
+    LayerMask selectionLayerMask;
 
     [SerializeField]
     LayerMask levelGridMask;
 
     [SerializeField]
-    int rayLength;
+    LayerMask tileLayerMask;
 
+    [Header("Mouse Ray")]
+    [SerializeField]
+    int rayLength = 0;
+
+    [Header("Bar Containing Icons")]
     [SerializeField]
     SelectionBar selection;
 
+    [Header("World Canvas")]
     [SerializeField]
     LevelGrid grid;
 
@@ -62,7 +73,7 @@ public class ToolSet : MonoBehaviour {
 
         RaycastHit2D hit;
 
-        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, tileLayerMask);
+        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, selectionLayerMask);
 
         if (hit) {
 
@@ -73,11 +84,15 @@ public class ToolSet : MonoBehaviour {
                 if (currentTileCollider != hit.collider) {
 
                     currentTileCollider = hit.collider;
+
                     currentTile = hit.transform.GetComponent<SelectionTile>();
+
+                    settings = currentTile.tileSettings;
 
                     isHoveringOverLevel = false;
                 }
             }
+
         } else {
 
             if (currentTile == null) {
@@ -120,9 +135,9 @@ public class ToolSet : MonoBehaviour {
                 CreateTile();
             }
 
-        } else if (Input.GetKeyDown(KeyCode.Mouse1)) {
+        } else if (Input.GetKey(KeyCode.Mouse1)) {
 
-            ResetBrush();
+            RemoveTile();
         }
 
         MouseHoverSelection();
@@ -145,10 +160,39 @@ public class ToolSet : MonoBehaviour {
                     Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
                     PlaceHolderTile tile = Instantiate(placeHolder, roundedMouseCoordinates, Quaternion.identity);
                     tile.Renderer.sprite = currentTile.Renderer.sprite;
+                    tile.SettingsId = settings.id;
 
-                    AssignSortingLayer(ref tile, currentTile.Positioning);
+                    AssignSortingLayer(ref tile, settings.tilePositioning);
                     tile.gameObject.name = tile.gameObject.name.Split('(')[0];
-                    grid.AddTile(roundedMouseCoordinates, tile);
+                    grid.AddTile(roundedMouseCoordinates, tile, settings);
+
+                    isClicked = false;
+                }
+            }
+        }
+    }
+
+    void RemoveTile() {
+
+        RaycastHit2D hit;
+
+        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, tileLayerMask);
+
+        if (hit) {
+
+            PlaceHolderTile tile = hit.collider.GetComponent<PlaceHolderTile>();
+
+            if (tile != null) {
+
+                TileSettings settings = selection.GetSettingsByIndex(tile.SettingsId);
+
+                if (settings != null) {
+
+                    Vector3 coordinates = GetMousePosition();
+
+                    Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
+
+                    grid.RemoveTile(roundedMouseCoordinates, settings);
                 }
             }
         }

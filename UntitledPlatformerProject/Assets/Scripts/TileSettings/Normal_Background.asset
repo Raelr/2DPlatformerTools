@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 834f8b4a8bd38ea4cbec27cd9053b35d, type: 3}
   m_Name: Normal_Background
   m_EditorClassIdentifier: 
-  id: 1
+  id: 0
   tilePositioning: 0

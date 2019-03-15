@@ -86,7 +86,7 @@ public class TileGrid : MonoBehaviour {
         return gridTile;
     }
 
-    public void AddTile(SelectionTile tile, Sprite sprite, TileSettings settings) {
+    public void AddTile(SelectionTile tile, Sprite sprite, TileSettings settings, TileSettings tileSettings) {
 
         Vector3 gridBottomLeft = transform.position - Vector3.right * gridDimensions.x / 2 - Vector3.up * gridDimensions.y / 2;
 
@@ -103,7 +103,7 @@ public class TileGrid : MonoBehaviour {
                             inputTile.WorldPosition = worldPosition;
                             inputTile.Renderer.sprite = sprite;
                             inputTile.gameObject.name = sprite.name;
-                            inputTile.Positioning = settings.tilePositioning;
+                            inputTile.tileSettings = tileSettings;
 
                             currentRow.Tiles[x] = inputTile;
                             spotsToBeFilled--;

@@ -58,11 +58,22 @@ public class SelectionBar : MonoBehaviour {
                 if (settings.tiles.Length > 0) {
                     for (int x = 0; x < settings.tiles.Length; x++) {
                         SelectableTile tile = settings.tiles[x];
-                        currentGrid.AddTile(tilePrefab, tile.sprite, settings.settings);
+                        currentGrid.AddTile(tilePrefab, tile.sprite, settings.settings, settings.settings);
                     }
                 }
             }
         }
+    }
+
+    public TileSettings GetSettingsByIndex(int index) {
+
+        TileSettings settings = null;
+
+        if (index >= 0 || index <= tileIcons.Length -1) {
+            settings = tileIcons[index].settings;
+        }
+
+        return settings;
     }
 
     [System.Serializable]
