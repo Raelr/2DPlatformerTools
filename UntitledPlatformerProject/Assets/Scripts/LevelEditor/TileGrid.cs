@@ -100,6 +100,7 @@ public class TileGrid : MonoBehaviour {
                             Vector3 worldPosition = gridBottomLeft + Vector3.right * (i * tileArea + tileRadius) + Vector3.up * (x * tileArea + tileRadius);
                             SelectionTile inputTile = Instantiate(tile, worldPosition, Quaternion.identity);
 
+                            inputTile.transform.parent = this.gameObject.transform;
                             inputTile.WorldPosition = worldPosition;
                             inputTile.Renderer.sprite = sprite;
                             inputTile.gameObject.name = sprite.name;

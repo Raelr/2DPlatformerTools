@@ -39,6 +39,10 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     LevelGrid grid;
 
+    [Header("Default tool")]
+    [SerializeField]
+    Tool defaultTool;
+
     bool isClicked;
 
     bool isHoveringOverLevel;
@@ -206,15 +210,11 @@ public class ToolSet : MonoBehaviour {
 
             string shortenedCurrentName = currentTileName.Split('(')[0];
 
-            //Debug.Log(shortenedCurrentName);
-
             string tileName = collider.gameObject.name;
 
             string shortenedTileName = tileName.Split('(')[0];
 
             return currentTileName == shortenedTileName;
-
-            //Debug.Log(currentTileName);
 
         } else {
 
