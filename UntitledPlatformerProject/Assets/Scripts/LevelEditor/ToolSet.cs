@@ -39,12 +39,17 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     LevelGrid grid;
 
+    [Header("Default tool")]
+    [SerializeField]
+    Tool defaultTool;
+
     bool isClicked;
 
     bool isHoveringOverLevel;
 
     Vector2 mousePosition;
 
+    [Header("Placeholder")]
     [SerializeField]
     PlaceHolderTile placeHolder;
 
@@ -62,11 +67,6 @@ public class ToolSet : MonoBehaviour {
         grid = GetComponent<LevelGrid>();
 
         selection = GetComponent<SelectionBar>();
-    }
-
-    private void Update() {
-
-        CheckMouseinput();
     }
 
     void MouseHoverSelection() {
@@ -118,29 +118,31 @@ public class ToolSet : MonoBehaviour {
         }
     }
 
-    void CheckMouseinput() {
+    public void CheckMouseinput() {
 
         isClicked = false;
 
         Vector2 currentMousePosition = GetMousePosition();
 
-        MouseHoverLevel();
+        if (!MouseIsOutOfBounds()) {
+            MouseHoverLevel();
 
-        if (Input.GetKey(KeyCode.Mouse0)) {
+            if (Input.GetKey(KeyCode.Mouse0)) {
 
-            isClicked = true;
+                isClicked = true;
 
-            if (isHoveringOverLevel) {
+                if (isHoveringOverLevel) {
 
-                CreateTile();
+                    CreateTile();
+                }
+
+            } else if (Input.GetKey(KeyCode.Mouse1)) {
+
+                RemoveTile();
             }
 
-        } else if (Input.GetKey(KeyCode.Mouse1)) {
-
-            RemoveTile();
+            MouseHoverSelection();
         }
-
-        MouseHoverSelection();
     }
 
     void CreateTile() {
@@ -198,31 +200,6 @@ public class ToolSet : MonoBehaviour {
         }
     }
 
-    bool IsSameTile(Collider2D collider) {
-
-        if (currentTile != null) {
-
-            string currentTileName = currentTile.gameObject.name;
-
-            string shortenedCurrentName = currentTileName.Split('(')[0];
-
-            //Debug.Log(shortenedCurrentName);
-
-            string tileName = collider.gameObject.name;
-
-            string shortenedTileName = tileName.Split('(')[0];
-
-            return currentTileName == shortenedTileName;
-
-            //Debug.Log(currentTileName);
-
-        } else {
-
-            return false;
-        }
-
-    }
-
     void AssignSortingLayer(ref PlaceHolderTile tile, TileSettings.TilePositioning positioning) {
 
         tile.Renderer.sortingOrder = (int)positioning;
@@ -241,10 +218,16 @@ public class ToolSet : MonoBehaviour {
 
     Vector2 GetMousePosition() {
 
-        Vector2 mousePosition = Vector2.zero;
+        Vector2 MousePosition = Vector2.zero;
 
         mousePosition = new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
 
         return mousePosition;
+
+    }
+
+    bool MouseIsOutOfBounds() {
+
+        return Input.mousePosition.x <= 0 || Input.mousePosition.y <= 0 || Input.mousePosition.x > Screen.width - 10 || Input.mousePosition.y > Screen.height - 10;
     }
 }
