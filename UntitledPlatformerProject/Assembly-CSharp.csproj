@@ -63,6 +63,8 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\BundleManager.cs" />
     <Compile Include="Assets\Scripts\CameraFollow.cs" />
+    <Compile Include="Assets\Scripts\Data Structures\IIdentifiable.cs" />
+    <Compile Include="Assets\Scripts\Data Structures\Pair.cs" />
     <Compile Include="Assets\Scripts\InputManager.cs" />
     <Compile Include="Assets\Scripts\LevelData.cs" />
     <Compile Include="Assets\Scripts\LevelEditor\Brushes\StandardTileBrush.cs" />
@@ -83,7 +85,9 @@
     <Compile Include="Assets\Scripts\PlatformerScripts\RayCastUser.cs" />
     <Compile Include="Assets\Scripts\PlatformerScripts\Utilities.cs" />
     <Compile Include="Assets\Scripts\TileSettings.cs" />
+    <Compile Include="Assets\Scripts\UI\BrushUIManager.cs" />
     <Compile Include="Assets\Scripts\UI\Icon.cs" />
+    <Compile Include="Assets\Scripts\UI\SelectableButton.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />

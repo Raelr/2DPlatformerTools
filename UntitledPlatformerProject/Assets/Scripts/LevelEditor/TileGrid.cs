@@ -108,6 +108,7 @@ public class TileGrid : MonoBehaviour {
 
                             currentRow.Tiles[x] = inputTile;
                             spotsToBeFilled--;
+
                             return;
 
                         } else {

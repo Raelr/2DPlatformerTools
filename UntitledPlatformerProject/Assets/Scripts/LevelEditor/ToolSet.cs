@@ -5,7 +5,12 @@ using TMPro;
 
 public class ToolSet : MonoBehaviour {
 
+    public Tool CurrentTool { get { return currentTool; } set { currentTool = value; } }
+
     Collider2D currentTileCollider;
+
+    SelectableButton currentButton;
+
     [Header("Tool Settings")]
     [SerializeField, ReadOnly]
     SelectionTile currentTile;
@@ -27,6 +32,10 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     LayerMask tileLayerMask;
 
+    [Header("Brushes")]
+    [SerializeField]
+    Tool[] Brushes;
+
     [Header("Mouse Ray")]
     [SerializeField]
     int rayLength = 0;
@@ -39,9 +48,9 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     LevelGrid grid;
 
-    [Header("Default tool")]
-    [SerializeField]
-    Tool defaultTool;
+    [Header("current tool")]
+    [SerializeField, ReadOnly]
+    Tool currentTool;
 
     bool isClicked;
 
@@ -65,10 +74,9 @@ public class ToolSet : MonoBehaviour {
         isHoveringOverLevel = false;
 
         grid = GetComponent<LevelGrid>();
-
-        selection = GetComponent<SelectionBar>();
     }
 
+    // This should stay in toolset.
     void MouseHoverSelection() {
 
         RaycastHit2D hit;
@@ -81,18 +89,34 @@ public class ToolSet : MonoBehaviour {
 
             if (isClicked) {
 
-                if (currentTileCollider != hit.collider) {
+                //if (currentTileCollider != hit.collider) {
 
+                //    currentTileCollider = hit.collider;
+
+                //    currentTile = hit.transform.GetComponent<SelectionTile>();
+
+                //    settings = currentTile.tileSettings;
+
+                //    isHoveringOverLevel = false;
+                //}
+
+            if (currentTileCollider != hit.collider) {
+
+                    if (currentButton != null) {
+                        currentButton.IsActivated = false;
+                    }
+                    
                     currentTileCollider = hit.collider;
+                    currentButton = hit.transform.GetComponent<SelectableButton>();
+                    Debug.Log(currentButton);
 
-                    currentTile = hit.transform.GetComponent<SelectionTile>();
+                    if (currentButton.onClicked != null) {
 
-                    settings = currentTile.tileSettings;
-
-                    isHoveringOverLevel = false;
-                }
+                        currentButton.onClicked.Invoke();
+                        currentButton.IsActivated = true;
+                    }
+                }                
             }
-
         } else {
 
             if (currentTile == null) {
@@ -145,6 +169,7 @@ public class ToolSet : MonoBehaviour {
         }
     }
 
+    // This should go in standardTileBrush.
     void CreateTile() {
 
         if (currentTile != null) {
@@ -174,6 +199,7 @@ public class ToolSet : MonoBehaviour {
         }
     }
 
+    // This should go in eraser.
     void RemoveTile() {
 
         RaycastHit2D hit;

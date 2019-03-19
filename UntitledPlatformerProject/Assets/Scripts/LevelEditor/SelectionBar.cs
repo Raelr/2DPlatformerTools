@@ -29,6 +29,13 @@ public class SelectionBar : MonoBehaviour {
     [SerializeField]
     SelectionTile tilePrefab;
 
+    [Header("Positioning within UI")]
+    [SerializeField]
+    float offsetX;
+
+    [SerializeField]
+    float offsetY;
+
     private void Awake() {
 
         currentGrid = tileGrid[0];
@@ -44,8 +51,8 @@ public class SelectionBar : MonoBehaviour {
 
     void SetGridDimensions() {
 
-        int xMax = Mathf.RoundToInt(selectionSprite.transform.localScale.x - 1);
-        int yMax = Mathf.RoundToInt(selectionSprite.transform.localScale.y - 1);
+        int xMax = Mathf.RoundToInt(selectionSprite.transform.localScale.x - offsetX);
+        int yMax = Mathf.RoundToInt(selectionSprite.transform.localScale.y - offsetY);
 
         currentGrid.GridDimensions = new Vector2(xMax, yMax);
     }

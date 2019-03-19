@@ -4,5 +4,8 @@ using UnityEngine;
 
 public abstract class Tool : MonoBehaviour
 {
+    [SerializeField]
+    LayerMask toolSelectionMask;
+
     public abstract void OnClick();
 }
