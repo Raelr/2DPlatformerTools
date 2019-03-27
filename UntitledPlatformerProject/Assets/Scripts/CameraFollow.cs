@@ -50,7 +50,7 @@ public class CameraFollow : MonoBehaviour {
 
             Vector3 smoothMove = Vector3.SmoothDamp(transform.position, cameraPosition, ref moveVelocity, smoothCameraTiming);
 
-            transform.Translate(smoothMove);
+            transform.position = smoothMove;
 
             oldPosition = cameraFocus.position;
         }
