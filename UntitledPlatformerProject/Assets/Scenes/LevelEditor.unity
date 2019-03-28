@@ -628,6 +628,7 @@ MonoBehaviour:
   currentTileCollider: {fileID: 0}
   placeHolder: {fileID: 7162664778463250405, guid: aa712bcd18ea5ca4ea9c2440b3513d56,
     type: 3}
+  tileSpawnOffset: {x: 0, y: 0, z: -4}
 --- !u!1 &1745661449
 GameObject:
   m_ObjectHideFlags: 0

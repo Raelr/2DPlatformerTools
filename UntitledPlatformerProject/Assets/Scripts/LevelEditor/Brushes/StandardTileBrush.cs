@@ -21,7 +21,7 @@ public class StandardTileBrush : Tool {
     private void Awake() {
 
         hoverTile = Instantiate(placeHolder, transform.position + tileSpawnOffset, Quaternion.identity);
-        hoverTile.enabled = false;
+        hoverTile.gameObject.SetActive(false);
     }
 
     public override void OnLeftClick() {
@@ -56,26 +56,30 @@ public class StandardTileBrush : Tool {
         tile.Renderer.sortingOrder = (int)positioning;
     }
 
-    public override void OnHover() {
+    public override void OnHover(bool isActive) {
 
-        if (selectedTile != null) {
+        if (isActive) {
 
-            if (!hoverTile.enabled) {
-                hoverTile.enabled = true;
+            if (selectedTile != null) {
+
+                hoverTile.gameObject.SetActive(true);
+
+                if (hoverTile.Renderer.sprite != selectedTile.Renderer.sprite) {
+                    hoverTile.Renderer.sprite = selectedTile.Renderer.sprite;
+                }
+
+                Vector2 roundedMousePosition = Utilities.GetRoundedMousePosition();
+
+                if (roundedMousePosition != oldMousePosition) {
+
+                    oldMousePosition = roundedMousePosition;
+                    hoverTile.transform.position = new Vector3(roundedMousePosition.x, roundedMousePosition.y, tileSpawnOffset.z);
+                }
             }
-            
-            if (hoverTile.Renderer.sprite != selectedTile.Renderer.sprite) {
-                hoverTile.Renderer.sprite = selectedTile.Renderer.sprite;
-            }
-            
 
-            Vector2 roundedMousePosition = Utilities.GetRoundedMousePosition();
+        } else {
 
-            if (roundedMousePosition != oldMousePosition) {
-
-                oldMousePosition = roundedMousePosition;
-                hoverTile.transform.position = roundedMousePosition;
-            }
+            hoverTile.gameObject.SetActive(false);
         }
     }
 }

@@ -21,7 +21,7 @@ public abstract class Tool : MonoBehaviour {
 
     public virtual void OnRightClick() { }
 
-    public virtual void OnHover() { }
+    public virtual void OnHover(bool isActive) { }
 
     public virtual void SelectTile() {
 
