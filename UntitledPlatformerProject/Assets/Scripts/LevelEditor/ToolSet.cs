@@ -5,17 +5,11 @@ using TMPro;
 
 public class ToolSet : MonoBehaviour {
 
-    Collider2D currentTileCollider;
-    [Header("Tool Settings")]
-    [SerializeField, ReadOnly]
-    SelectionTile currentTile;
+    public Tool CurrentTool { get { return currentTool; } set { currentTool = value; } }
 
-    [SerializeField, ReadOnly]
-    TileSettings settings;
+    Collider2D currentBrushCollider;
 
-    [Header("Tile Name Text")]
-    [SerializeField]
-    TextMeshPro text;
+    SelectableButton currentButton;
 
     [Header("Layer Masks")]
     [SerializeField]
@@ -35,13 +29,9 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     SelectionBar selection;
 
-    [Header("World Canvas")]
-    [SerializeField]
-    LevelGrid grid;
-
-    [Header("Default tool")]
-    [SerializeField]
-    Tool defaultTool;
+    [Header("current tool")]
+    [SerializeField, ReadOnly]
+    Tool currentTool;
 
     bool isClicked;
 
@@ -59,47 +49,65 @@ public class ToolSet : MonoBehaviour {
 
     public event LevelEditorMovedHandler cameraMoved;
 
+    public delegate void BrushClickHandler();
+
+    public BrushClickHandler brushUsed;
+
+    public delegate void BrushSelectionHandler();
+
+    public BrushSelectionHandler onBrushSelection;
+
+    public delegate void BrushHoverHandler();
+
+    public BrushHoverHandler onBrushHover;
+
     private void Awake() {
 
         isClicked = false;
         isHoveringOverLevel = false;
-
-        grid = GetComponent<LevelGrid>();
-
-        selection = GetComponent<SelectionBar>();
     }
 
-    void MouseHoverSelection() {
+    void CheckForBrushButtonSelection() {
 
         RaycastHit2D hit;
 
-        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, selectionLayerMask);
+        hit = Physics2D.Raycast(Utilities.GetMousePosition(), Vector2.up * rayLength, 1, selectionLayerMask);
 
         if (hit) {
 
-            UpdateText(hit.transform.name);
-
             if (isClicked) {
 
-                if (currentTileCollider != hit.collider) {
+                if (currentBrushCollider != hit.collider) {
 
-                    currentTileCollider = hit.collider;
+                    if (currentButton != null) {
+                        currentButton.IsActivated = false;
+                    }
 
-                    currentTile = hit.transform.GetComponent<SelectionTile>();
+                    RemoveBrushDelegates();
 
-                    settings = currentTile.tileSettings;
+                    currentBrushCollider = hit.collider;
+                    currentButton = hit.transform.GetComponent<SelectableButton>();
 
-                    isHoveringOverLevel = false;
+                    currentButton.onClicked?.Invoke();
+                    currentButton.IsActivated = true;
+
+                    onBrushSelection += currentTool.SelectTile;
+                    brushUsed += currentTool.OnLeftClick;
+                    onBrushHover += currentTool.OnHover;
                 }
             }
+        }
+    }
 
-        } else {
+    void RemoveBrushDelegates() {
 
-            if (currentTile == null) {
-                UpdateText("None");
-            }
+        if (currentTool != null) {
 
-            isHoveringOverLevel = false;
+            onBrushSelection -= currentTool.SelectTile;
+
+            brushUsed -= currentTool.OnLeftClick;
+
+            onBrushHover -= currentTool.OnHover;
         }
     }
 
@@ -107,11 +115,14 @@ public class ToolSet : MonoBehaviour {
 
         RaycastHit2D hit;
 
-        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, levelGridMask);
+        hit = Physics2D.Raycast(Utilities.GetMousePosition(), Vector2.up * rayLength, 1, levelGridMask);
 
         if (!hit) {
 
             isHoveringOverLevel = true;
+
+            onBrushHover?.Invoke();
+
         } else {
 
             isHoveringOverLevel = false;
@@ -122,112 +133,45 @@ public class ToolSet : MonoBehaviour {
 
         isClicked = false;
 
-        Vector2 currentMousePosition = GetMousePosition();
+        Vector2 currentMousePosition = Utilities.GetMousePosition();
 
-        if (!MouseIsOutOfBounds()) {
+        if (!Utilities.MouseIsOutOfBounds()) {
+
             MouseHoverLevel();
 
             if (Input.GetKey(KeyCode.Mouse0)) {
 
                 isClicked = true;
 
+                CheckForBrushButtonSelection();
+
+                onBrushSelection?.Invoke();
+
                 if (isHoveringOverLevel) {
 
-                    CreateTile();
+                    brushUsed?.Invoke();
                 }
 
-            } else if (Input.GetKey(KeyCode.Mouse1)) {
+                isClicked = false;
 
-                RemoveTile();
-            }
+            } else if (Input.GetKeyDown(KeyCode.Mouse1)) {
 
-            MouseHoverSelection();
-        }
-    }
-
-    void CreateTile() {
-
-        if (currentTile != null) {
-
-            RaycastHit2D hit;
-
-            hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, levelGridMask);
-
-            if (!hit) {
-
-                if (isClicked) {
-
-                    Vector3 coordinates = GetMousePosition();
-
-                    Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
-                    PlaceHolderTile tile = Instantiate(placeHolder, roundedMouseCoordinates, Quaternion.identity);
-                    tile.Renderer.sprite = currentTile.Renderer.sprite;
-                    tile.SettingsId = settings.id;
-
-                    AssignSortingLayer(ref tile, settings.tilePositioning);
-                    tile.gameObject.name = tile.gameObject.name.Split('(')[0];
-                    grid.AddTile(roundedMouseCoordinates, tile, settings);
-
-                    isClicked = false;
-                }
+                ResetBrush();
             }
         }
-    }
-
-    void RemoveTile() {
-
-        RaycastHit2D hit;
-
-        hit = Physics2D.Raycast(GetMousePosition(), Vector2.up * rayLength, 1, tileLayerMask);
-
-        if (hit) {
-
-            PlaceHolderTile tile = hit.collider.GetComponent<PlaceHolderTile>();
-
-            if (tile != null) {
-
-                TileSettings settings = selection.GetSettingsByIndex(tile.SettingsId);
-
-                if (settings != null) {
-
-                    Vector3 coordinates = GetMousePosition();
-
-                    Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
-
-                    grid.RemoveTile(roundedMouseCoordinates, settings);
-                }
-            }
-        }
-    }
-
-    void AssignSortingLayer(ref PlaceHolderTile tile, TileSettings.TilePositioning positioning) {
-
-        tile.Renderer.sortingOrder = (int)positioning;
     }
 
     void ResetBrush() {
 
-        currentTile = null;
-        UpdateText("None");
-    }
+        RemoveBrushDelegates();
 
-    void UpdateText(string name) {
+        if (currentButton != null) {
+            currentButton.IsActivated = false;
+        }
 
-        text.text = "Tile: " + name;
-    }
+        currentBrushCollider = null;
+        currentTool = null;
+        currentButton = null;
 
-    Vector2 GetMousePosition() {
-
-        Vector2 MousePosition = Vector2.zero;
-
-        mousePosition = new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
-
-        return mousePosition;
-
-    }
-
-    bool MouseIsOutOfBounds() {
-
-        return Input.mousePosition.x <= 0 || Input.mousePosition.y <= 0 || Input.mousePosition.x > Screen.width - 10 || Input.mousePosition.y > Screen.height - 10;
     }
 }

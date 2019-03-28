@@ -20,7 +20,27 @@ public class Utilities : MonoBehaviour {
         equals = distance < 0.00000001 ? true : false;
 
         return equals;
-    }  
+    }
+
+    public static Vector2 GetMousePosition() {
+
+        Vector2 MousePosition = Vector2.zero;
+
+        MousePosition = new Vector2(Camera.main.ScreenToWorldPoint(Input.mousePosition).x, Camera.main.ScreenToWorldPoint(Input.mousePosition).y);
+
+        return MousePosition;
+
+    }
+
+    public static bool MouseIsOutOfBounds() {
+
+        return Input.mousePosition.x <= 0 || Input.mousePosition.y <= 0 || Input.mousePosition.x > Screen.width - 10 || Input.mousePosition.y > Screen.height - 10;
+    }
+
+    public static Vector2 GetRoundedMousePosition() {
+
+        return new Vector3(Mathf.RoundToInt(GetMousePosition().x), Mathf.RoundToInt(GetMousePosition().y));
+    }
 }
 
 public class ReadOnlyAttribute : PropertyAttribute { }
