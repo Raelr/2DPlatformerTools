@@ -57,7 +57,7 @@ public class ToolSet : MonoBehaviour {
 
     public BrushSelectionHandler onBrushSelection;
 
-    public delegate void BrushHoverHandler();
+    public delegate void BrushHoverHandler(bool isActive);
 
     public BrushHoverHandler onBrushHover;
 
@@ -121,12 +121,13 @@ public class ToolSet : MonoBehaviour {
 
             isHoveringOverLevel = true;
 
-            onBrushHover?.Invoke();
-
         } else {
 
             isHoveringOverLevel = false;
+
         }
+
+        onBrushHover?.Invoke(isHoveringOverLevel);
     }
 
     public void CheckMouseinput() {
