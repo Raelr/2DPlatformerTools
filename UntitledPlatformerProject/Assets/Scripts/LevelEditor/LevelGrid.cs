@@ -12,6 +12,15 @@ public class LevelGrid : MonoBehaviour {
     [SerializeField]
     float tileSpacing;
 
+    public static LevelGrid instance;
+
+    private void Awake() {
+        
+        if (instance == null) {
+            instance = this;
+        }
+    }
+
     public void AddTile(Vector2 coordinates, PlaceHolderTile tile, TileSettings settings) {
 
         TileData newTileData = new TileData(settings, tile.Renderer.sprite, tile, coordinates);
