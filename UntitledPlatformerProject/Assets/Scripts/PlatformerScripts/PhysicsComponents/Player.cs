@@ -2,11 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour {
-
-    [Header("Player Controller")]
-    [SerializeField]
-    Controller2D controller;
+public class Player : CollisionUser {
 
     Vector3 input;
 
@@ -15,9 +11,9 @@ public class Player : MonoBehaviour {
 
     public event PlayerMovedHandler playerMoved;
 
-    void Start() {
+    private void Awake() {
 
-        controller = GetComponent<Controller2D>();
+        Initialise();
     }
 
     void Update() {
@@ -62,10 +58,7 @@ public class Player : MonoBehaviour {
         }
 
         // If anything is listening for player movement then invoke the delegate.
-        if (playerMoved != null) {
-
-            playerMoved.Invoke();
-        }
+        playerMoved?.Invoke();
     }
 
     /// <summary>
@@ -85,5 +78,16 @@ public class Player : MonoBehaviour {
 
     bool IsStill() {
         return input.x == 0 && input.y == 0;
+    }
+
+    public override bool IgnoreCollisions(RaycastHit2D hit, float direction = 0, bool isCrouching = false) {
+
+        bool success = false;
+
+        bool CheckingDirection = direction != 0;
+
+        success = currentPlatform.AllowedToJumpThrough(direction, true) || isCrouching && currentPlatform.CanFallThrough() || hit.distance == 0;
+
+        return success;
     }
 }
