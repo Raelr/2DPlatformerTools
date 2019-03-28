@@ -36,8 +36,11 @@ public class Utilities : MonoBehaviour {
 
         return Input.mousePosition.x <= 0 || Input.mousePosition.y <= 0 || Input.mousePosition.x > Screen.width - 10 || Input.mousePosition.y > Screen.height - 10;
     }
-}
 
-    
+    public static Vector2 GetRoundedMousePosition() {
+
+        return new Vector3(Mathf.RoundToInt(GetMousePosition().x), Mathf.RoundToInt(GetMousePosition().y));
+    }
+}
 
 public class ReadOnlyAttribute : PropertyAttribute { }

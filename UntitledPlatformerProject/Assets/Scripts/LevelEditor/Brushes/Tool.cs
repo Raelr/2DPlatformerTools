@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Tool : MonoBehaviour
-{
+public abstract class Tool : MonoBehaviour {
     [Header("Selection Mask")]
     [SerializeField]
     protected LayerMask toolSelectionMask;
@@ -18,9 +17,13 @@ public abstract class Tool : MonoBehaviour
 
     protected TileSettings tileSettings;
 
-    public abstract void OnClick();
+    public virtual void OnLeftClick() { }
 
-    public void SelectTile() {
+    public virtual void OnRightClick() { }
+
+    public virtual void OnHover() { }
+
+    public virtual void SelectTile() {
 
         RaycastHit2D hit;
 

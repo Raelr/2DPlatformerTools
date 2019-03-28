@@ -57,6 +57,10 @@ public class ToolSet : MonoBehaviour {
 
     public BrushSelectionHandler onBrushSelection;
 
+    public delegate void BrushHoverHandler();
+
+    public BrushHoverHandler onBrushHover;
+
     private void Awake() {
 
         isClicked = false;
@@ -88,23 +92,22 @@ public class ToolSet : MonoBehaviour {
                     currentButton.IsActivated = true;
 
                     onBrushSelection += currentTool.SelectTile;
-                    brushUsed += currentTool.OnClick;
+                    brushUsed += currentTool.OnLeftClick;
+                    onBrushHover += currentTool.OnHover;
                 }
             }
-        } 
+        }
     }
 
     void RemoveBrushDelegates() {
 
         if (currentTool != null) {
 
-            if (onBrushSelection == null) {
-                onBrushSelection -= currentTool.SelectTile;
-            }
+            onBrushSelection -= currentTool.SelectTile;
 
-            if (brushUsed == null) {
-                brushUsed -= currentTool.OnClick;
-            }
+            brushUsed -= currentTool.OnLeftClick;
+
+            onBrushHover -= currentTool.OnHover;
         }
     }
 
@@ -117,6 +120,8 @@ public class ToolSet : MonoBehaviour {
         if (!hit) {
 
             isHoveringOverLevel = true;
+
+            onBrushHover?.Invoke();
 
         } else {
 
@@ -151,48 +156,14 @@ public class ToolSet : MonoBehaviour {
 
             } else if (Input.GetKeyDown(KeyCode.Mouse1)) {
 
-                RemoveTile();
                 ResetBrush();
-            }
-        }
-    }
-
-    // This should go in eraser.
-    void RemoveTile() {
-
-        RaycastHit2D hit;
-
-        hit = Physics2D.Raycast(Utilities.GetMousePosition(), Vector2.up * rayLength, 1, tileLayerMask);
-
-        if (hit) {
-
-            PlaceHolderTile tile = hit.collider.GetComponent<PlaceHolderTile>();
-
-            if (tile != null) {
-
-                TileSettings settings = selection.GetSettingsByIndex(tile.SettingsId);
-
-                if (settings != null) {
-
-                    Vector3 coordinates = Utilities.GetMousePosition();
-
-                    Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
-
-                    LevelGrid.instance.RemoveTile(roundedMouseCoordinates, settings);
-                }
             }
         }
     }
 
     void ResetBrush() {
 
-        if (onBrushSelection != null) {
-            onBrushSelection -= currentTool.SelectTile;
-        }
-        
-        if (brushUsed != null) {
-            brushUsed -= currentTool.OnClick;
-        }
+        RemoveBrushDelegates();
 
         if (currentButton != null) {
             currentButton.IsActivated = false;
@@ -201,6 +172,6 @@ public class ToolSet : MonoBehaviour {
         currentBrushCollider = null;
         currentTool = null;
         currentButton = null;
-        
+
     }
 }

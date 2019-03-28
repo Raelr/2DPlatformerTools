@@ -10,7 +10,21 @@ public class StandardTileBrush : Tool {
     [SerializeField]
     PlaceHolderTile placeHolder;
 
-    public override void OnClick() {
+    PlaceHolderTile hoverTile;
+
+    [Header("Tile Spawn Offset")]
+    [SerializeField]
+    Vector3 tileSpawnOffset;
+
+    Vector2 oldMousePosition;
+
+    private void Awake() {
+
+        hoverTile = Instantiate(placeHolder, transform.position + tileSpawnOffset, Quaternion.identity);
+        hoverTile.enabled = false;
+    }
+
+    public override void OnLeftClick() {
 
         CreateTile();
     }
@@ -33,8 +47,35 @@ public class StandardTileBrush : Tool {
         }
     }
 
+    public override void SelectTile() {
+        base.SelectTile();
+    }
+
     void AssignSortingLayer(ref PlaceHolderTile tile, TileSettings.TilePositioning positioning) {
 
         tile.Renderer.sortingOrder = (int)positioning;
+    }
+
+    public override void OnHover() {
+
+        if (selectedTile != null) {
+
+            if (!hoverTile.enabled) {
+                hoverTile.enabled = true;
+            }
+            
+            if (hoverTile.Renderer.sprite != selectedTile.Renderer.sprite) {
+                hoverTile.Renderer.sprite = selectedTile.Renderer.sprite;
+            }
+            
+
+            Vector2 roundedMousePosition = Utilities.GetRoundedMousePosition();
+
+            if (roundedMousePosition != oldMousePosition) {
+
+                oldMousePosition = roundedMousePosition;
+                hoverTile.transform.position = roundedMousePosition;
+            }
+        }
     }
 }
