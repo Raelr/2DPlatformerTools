@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class StandardTileBrush : Tool {
 
@@ -17,6 +18,12 @@ public class StandardTileBrush : Tool {
     Vector3 tileSpawnOffset;
 
     Vector2 oldMousePosition;
+
+    [Header("InformationText")]
+    [SerializeField]
+    TextMeshPro informationText;
+    
+    int sortingOrder;
 
     private void Awake() {
 
@@ -37,23 +44,19 @@ public class StandardTileBrush : Tool {
             Vector3 coordinates = Utilities.GetMousePosition();
 
             Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
-            PlaceHolderTile tile = Instantiate(placeHolder, roundedMouseCoordinates, Quaternion.identity);
+            PlaceHolderTile tile = Instantiate(placeHolder, hoverTile.transform.position, Quaternion.identity);
             tile.Renderer.sprite = selectedTile.Renderer.sprite;
             tile.SettingsId = tileSettings.id;
 
-            AssignSortingLayer(ref tile, tileSettings.tilePositioning);
+            tile.Renderer.sortingOrder = hoverTile.Renderer.sortingOrder;
             tile.gameObject.name = tile.gameObject.name.Split('(')[0];
-            LevelGrid.instance.AddTile(roundedMouseCoordinates, tile, tileSettings);
+            LevelGrid.instance.AddTile(tile.transform.position, tile, tileSettings);
         }
     }
 
     public override void SelectTile() {
+
         base.SelectTile();
-    }
-
-    void AssignSortingLayer(ref PlaceHolderTile tile, TileSettings.TilePositioning positioning) {
-
-        tile.Renderer.sortingOrder = (int)positioning;
     }
 
     public override void OnHover(bool isActive) {
@@ -68,6 +71,8 @@ public class StandardTileBrush : Tool {
                     hoverTile.Renderer.sprite = selectedTile.Renderer.sprite;
                 }
 
+                AssignSortingLayer();
+
                 Vector2 roundedMousePosition = Utilities.GetRoundedMousePosition();
 
                 if (roundedMousePosition != oldMousePosition) {
@@ -81,5 +86,36 @@ public class StandardTileBrush : Tool {
 
             hoverTile.gameObject.SetActive(false);
         }
+    }
+
+    void AssignSortingLayer() {
+
+        if (Input.mouseScrollDelta.y > 0f) {
+
+            sortingOrder++;
+
+        } else if (Input.mouseScrollDelta.y < 0f) {
+
+            sortingOrder--;
+        }
+
+        sortingOrder = Mathf.Clamp(sortingOrder, -2, 2);
+
+        hoverTile.Renderer.sortingOrder = sortingOrder;
+
+        UpdateOrderingText(sortingOrder);
+    }
+
+    void UpdateOrderingText(int sortingOrder) {
+
+        string text = sortingOrder < 0 ? "Tile Positioning: Background" : sortingOrder > 0 ? "Tile Positioning: ForeGround" : "Tile Positioning: MidGround";
+
+        UIManager.UpdateTilePositioningText(informationText, text);
+    }
+
+    public override void ResetBrush() {
+
+        base.ResetBrush();
+        hoverTile.Renderer.sortingOrder = placeHolder.Renderer.sortingOrder;
     }
 }

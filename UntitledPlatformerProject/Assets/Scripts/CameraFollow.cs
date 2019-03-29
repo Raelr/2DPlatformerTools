@@ -44,7 +44,7 @@ public class CameraFollow : MonoBehaviour {
 
     public void FollowPlayer() {
 
-        if (!Utilities.VectorEquals(cameraFocus.position, oldPosition)) {
+        if (!Utilities.Vector3Equals(cameraFocus.position, oldPosition)) {
 
             Vector3 cameraPosition = cameraFocus.position + cameraOffset;
 
