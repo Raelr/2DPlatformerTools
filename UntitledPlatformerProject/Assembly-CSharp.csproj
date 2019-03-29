@@ -89,6 +89,7 @@
     <Compile Include="Assets\Scripts\UI\BrushUIManager.cs" />
     <Compile Include="Assets\Scripts\UI\Icon.cs" />
     <Compile Include="Assets\Scripts\UI\SelectableButton.cs" />
+    <Compile Include="Assets\Scripts\UI\UIManager.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
     <None Include="Assets\TextMesh Pro\Resources\LineBreaking Leading Characters.txt" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMPro_Properties.cginc" />

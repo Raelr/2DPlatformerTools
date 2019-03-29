@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class StandardTileBrush : Tool {
 
@@ -18,6 +19,10 @@ public class StandardTileBrush : Tool {
 
     Vector2 oldMousePosition;
 
+    [Header("InformationText")]
+    [SerializeField]
+    TextMeshPro informationText;
+    
     int sortingOrder;
 
     private void Awake() {
@@ -97,6 +102,15 @@ public class StandardTileBrush : Tool {
         sortingOrder = Mathf.Clamp(sortingOrder, -2, 2);
 
         hoverTile.Renderer.sortingOrder = sortingOrder;
+
+        UpdateOrderingText(sortingOrder);
+    }
+
+    void UpdateOrderingText(int sortingOrder) {
+
+        string text = sortingOrder < 0 ? "Tile Positioning: Background" : sortingOrder > 0 ? "Tile Positioning: ForeGround" : "Tile Positioning: MidGround";
+
+        UIManager.UpdateTilePositioningText(informationText, text);
     }
 
     public override void ResetBrush() {

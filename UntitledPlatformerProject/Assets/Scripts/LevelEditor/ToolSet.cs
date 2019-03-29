@@ -25,10 +25,6 @@ public class ToolSet : MonoBehaviour {
     [SerializeField]
     int rayLength = 0;
 
-    [Header("Bar Containing Icons")]
-    [SerializeField]
-    SelectionBar selection;
-
     [Header("current tool")]
     [SerializeField, ReadOnly]
     Tool currentTool;
@@ -38,10 +34,6 @@ public class ToolSet : MonoBehaviour {
     bool isHoveringOverLevel;
 
     Vector2 mousePosition;
-
-    [Header("Placeholder")]
-    [SerializeField]
-    PlaceHolderTile placeHolder;
 
     Vector2 velocity;
 
