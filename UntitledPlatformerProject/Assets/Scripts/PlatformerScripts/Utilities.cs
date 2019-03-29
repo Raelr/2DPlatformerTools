@@ -11,7 +11,18 @@ public class Utilities : MonoBehaviour {
     /// <param name="vector2"> The second vector being compared </param>
     /// <returns> A boolean determining whether they are pproximately equal </returns>
 
-    public static bool VectorEquals(Vector3 vector1, Vector3 vector2) {
+    public static bool Vector3Equals(Vector3 vector1, Vector3 vector2) {
+
+        bool equals = false;
+
+        float distance = (vector1 - vector2).sqrMagnitude;
+
+        equals = distance < 0.00000001 ? true : false;
+
+        return equals;
+    }
+
+    public static bool Vector2Equals(Vector2 vector1, Vector2 vector2) {
 
         bool equals = false;
 

@@ -157,6 +157,7 @@ public class ToolSet : MonoBehaviour {
 
             } else if (Input.GetKeyDown(KeyCode.Mouse1)) {
 
+                currentTool.ResetBrush();
                 ResetBrush();
             }
         }

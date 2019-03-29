@@ -34,7 +34,7 @@ public class EraserBrush : Tool {
 
                     Vector3 roundedMouseCoordinates = new Vector3(Mathf.RoundToInt(coordinates.x), Mathf.RoundToInt(coordinates.y), 2);
 
-                    LevelGrid.instance.RemoveTile(roundedMouseCoordinates, settings);
+                    LevelGrid.instance.RemoveTile(roundedMouseCoordinates, tile);
                 }
             }
         }

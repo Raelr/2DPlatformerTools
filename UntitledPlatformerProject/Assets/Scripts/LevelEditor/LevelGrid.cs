@@ -25,25 +25,27 @@ public class LevelGrid : MonoBehaviour {
 
         TileData newTileData = new TileData(settings, tile.Renderer.sprite, tile, coordinates);
 
-        Vector2 newCoordinates = GetHashedVector(coordinates, (int)settings.tilePositioning);
+        Vector2 newCoordinates = GetHashedVector(coordinates, tile.Renderer.sortingOrder);
 
         if (tiles.ContainsKey(newCoordinates)) {
 
             TileData data = tiles[newCoordinates];
 
-            if (settings.tilePositioning == data.settings.tilePositioning) {
-                RemoveTile(coordinates, settings);
+            if (data.placeHolder.Renderer.sortingOrder == newTileData.placeHolder.Renderer.sortingOrder) {
+
+                RemoveTile(coordinates, tile);
             }
         }
 
         tiles.Add(newCoordinates, newTileData);
     }
 
-    public void RemoveTile(Vector2 coordinates, TileSettings settings) {
+    public void RemoveTile(Vector2 coordinates, PlaceHolderTile tile) {
 
-        Vector2 newCoordinates = GetHashedVector(coordinates, (int)settings.tilePositioning);
+        Vector2 newCoordinates = GetHashedVector(coordinates, tile.Renderer.sortingOrder);
 
         if (tiles.ContainsKey(newCoordinates)) {
+
             TileData oldTile = tiles[newCoordinates];
             Destroy(oldTile.placeHolder.gameObject);
             tiles.Remove(newCoordinates);
